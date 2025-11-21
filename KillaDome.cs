@@ -1224,128 +1224,128 @@ namespace Oxide.Plugins
                     currentWeapon = editingSlot == "primary" ? "ak47" : "pistol";
                 }
                 
-                // TOP HEADER
+                // === HEADER === (8% height)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.08 0.08 0.12 0.95" },
-                    RectTransform = { AnchorMin = "0.05 0.90", AnchorMax = "0.95 0.96" }
-                }, UI_TAB_CONTAINER, "LoadoutTopHeader");
+                    RectTransform = { AnchorMin = "0.05 0.90", AnchorMax = "0.95 0.98" }
+                }, UI_TAB_CONTAINER, "LoadoutHeader");
                 
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "1 0.6 0.2 0.6" },
-                    RectTransform = { AnchorMin = "0 0.95", AnchorMax = "1 1" }
-                }, "LoadoutTopHeader");
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.05" }
+                }, "LoadoutHeader");
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = "LOADOUT EDITOR", FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 0.9 0.7 1" },
-                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 1" }
-                }, "LoadoutTopHeader");
+                    Text = { Text = "LOADOUT EDITOR", FontSize = 18, Align = TextAnchor.MiddleCenter, Color = "1 0.9 0.7 1" },
+                    RectTransform = { AnchorMin = "0 0.05", AnchorMax = "1 1" }
+                }, "LoadoutHeader");
                 
-                // WEAPON SELECTION SECTION
+                // === WEAPON SELECTION === (20% height)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.06 0.06 0.08 0.9" },
-                    RectTransform = { AnchorMin = "0.05 0.70", AnchorMax = "0.95 0.88" }
-                }, UI_TAB_CONTAINER, "WeaponSelectionArea");
+                    RectTransform = { AnchorMin = "0.05 0.68", AnchorMax = "0.95 0.88" }
+                }, UI_TAB_CONTAINER, "WeaponSelection");
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = "SELECT WEAPONS", FontSize = 12, Align = TextAnchor.UpperLeft, Color = "0.8 0.8 0.8 1" },
-                    RectTransform = { AnchorMin = "0.02 0.88", AnchorMax = "0.30 0.98" }
-                }, "WeaponSelectionArea");
+                    Text = { Text = "SELECT WEAPONS", FontSize = 11, Align = TextAnchor.UpperLeft, Color = "0.8 0.8 0.8 1" },
+                    RectTransform = { AnchorMin = "0.02 0.92", AnchorMax = "0.30 1" }
+                }, "WeaponSelection");
                 
                 // PRIMARY WEAPON
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.12 0.12 0.16 0.95" },
-                    RectTransform = { AnchorMin = "0.02 0.10", AnchorMax = "0.49 0.85" }
-                }, "WeaponSelectionArea", "PrimaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.02 0.05", AnchorMax = "0.49 0.88" }
+                }, "WeaponSelection", "PrimaryBox");
                 
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "1 0.6 0.2 0.3" },
-                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.01 1" }
-                }, "PrimaryWeaponBox");
+                    Image = { Color = "1 0.6 0.2 0.4" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.015 1" }
+                }, "PrimaryBox");
                 
                 container.Add(new CuiLabel
                 {
                     Text = { Text = "PRIMARY WEAPON", FontSize = 10, Align = TextAnchor.UpperCenter, Color = "1 0.8 0.5 1" },
-                    RectTransform = { AnchorMin = "0.05 0.85", AnchorMax = "0.95 0.98" }
-                }, "PrimaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
+                }, "PrimaryBox");
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = loadout.Primary.ToUpper(), FontSize = 18, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.40", AnchorMax = "0.95 0.75" }
-                }, "PrimaryWeaponBox");
+                    Text = { Text = loadout.Primary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.05 0.35", AnchorMax = "0.95 0.75" }
+                }, "PrimaryBox");
                 
                 container.Add(new CuiButton
                 {
                     Button = { Command = "killadome.weapon.prev primary", Color = "0.2 0.6 0.8 0.9" },
                     Text = { Text = "< PREV", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.05", AnchorMax = "0.48 0.25" }
-                }, "PrimaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.05 0.06", AnchorMax = "0.47 0.22" }
+                }, "PrimaryBox");
                 
                 container.Add(new CuiButton
                 {
                     Button = { Command = "killadome.weapon.next primary", Color = "0.2 0.6 0.8 0.9" },
                     Text = { Text = "NEXT >", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.52 0.05", AnchorMax = "0.95 0.25" }
-                }, "PrimaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.53 0.06", AnchorMax = "0.95 0.22" }
+                }, "PrimaryBox");
                 
                 // SECONDARY WEAPON
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.12 0.12 0.16 0.95" },
-                    RectTransform = { AnchorMin = "0.51 0.10", AnchorMax = "0.98 0.85" }
-                }, "WeaponSelectionArea", "SecondaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.51 0.05", AnchorMax = "0.98 0.88" }
+                }, "WeaponSelection", "SecondaryBox");
                 
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "0.5 0.7 1.0 0.3" },
-                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.01 1" }
-                }, "SecondaryWeaponBox");
+                    Image = { Color = "0.5 0.7 1.0 0.4" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.015 1" }
+                }, "SecondaryBox");
                 
                 container.Add(new CuiLabel
                 {
                     Text = { Text = "SECONDARY WEAPON", FontSize = 10, Align = TextAnchor.UpperCenter, Color = "0.7 0.9 1.0 1" },
-                    RectTransform = { AnchorMin = "0.05 0.85", AnchorMax = "0.95 0.98" }
-                }, "SecondaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
+                }, "SecondaryBox");
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = loadout.Secondary.ToUpper(), FontSize = 18, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.40", AnchorMax = "0.95 0.75" }
-                }, "SecondaryWeaponBox");
+                    Text = { Text = loadout.Secondary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.05 0.35", AnchorMax = "0.95 0.75" }
+                }, "SecondaryBox");
                 
                 container.Add(new CuiButton
                 {
                     Button = { Command = "killadome.weapon.prev secondary", Color = "0.5 0.3 0.8 0.9" },
                     Text = { Text = "< PREV", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.05", AnchorMax = "0.48 0.25" }
-                }, "SecondaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.05 0.06", AnchorMax = "0.47 0.22" }
+                }, "SecondaryBox");
                 
                 container.Add(new CuiButton
                 {
                     Button = { Command = "killadome.weapon.next secondary", Color = "0.5 0.3 0.8 0.9" },
                     Text = { Text = "NEXT >", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.52 0.05", AnchorMax = "0.95 0.25" }
-                }, "SecondaryWeaponBox");
+                    RectTransform = { AnchorMin = "0.53 0.06", AnchorMax = "0.95 0.22" }
+                }, "SecondaryBox");
                 
-                // CUSTOMIZATION SECTION
+                // === EDITOR SECTION === (66% height)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.06 0.06 0.08 0.9" },
-                    RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.68" }
-                }, UI_TAB_CONTAINER, "CustomizationArea");
+                    RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.66" }
+                }, UI_TAB_CONTAINER, "EditorArea");
                 
                 container.Add(new CuiLabel
                 {
                     Text = { Text = $"CUSTOMIZE: {currentWeapon.ToUpper()}", FontSize = 12, Align = TextAnchor.UpperLeft, Color = "0.8 0.8 0.8 1" },
-                    RectTransform = { AnchorMin = "0.02 0.955", AnchorMax = "0.50 0.995" }
-                }, "CustomizationArea");
+                    RectTransform = { AnchorMin = "0.02 0.96", AnchorMax = "0.50 1" }
+                }, "EditorArea");
                 
                 bool isPrimaryActive = editingSlot == "primary";
                 
@@ -1353,22 +1353,22 @@ namespace Oxide.Plugins
                 {
                     Button = { Command = "killadome.editweapon primary", Color = isPrimaryActive ? "0.2 0.6 0.8 0.9" : "0.15 0.15 0.18 0.9" },
                     Text = { Text = "PRIMARY", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = isPrimaryActive ? "1 1 1 1" : "0.6 0.6 0.6 1" },
-                    RectTransform = { AnchorMin = "0.70 0.960", AnchorMax = "0.83 0.995" }
-                }, "CustomizationArea");
+                    RectTransform = { AnchorMin = "0.72 0.96", AnchorMax = "0.84 1" }
+                }, "EditorArea");
                 
                 container.Add(new CuiButton
                 {
                     Button = { Command = "killadome.editweapon secondary", Color = !isPrimaryActive ? "0.5 0.3 0.8 0.9" : "0.15 0.15 0.18 0.9" },
                     Text = { Text = "SECONDARY", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = !isPrimaryActive ? "1 1 1 1" : "0.6 0.6 0.6 1" },
-                    RectTransform = { AnchorMin = "0.84 0.960", AnchorMax = "0.98 0.995" }
-                }, "CustomizationArea");
+                    RectTransform = { AnchorMin = "0.85 0.96", AnchorMax = "0.98 1" }
+                }, "EditorArea");
                 
-                // LEFT: SKINS
+                // LEFT PANEL - SKINS (with scrolling)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.10 0.10 0.14 0.95" },
                     RectTransform = { AnchorMin = "0.02 0.02", AnchorMax = "0.49 0.93" }
-                }, "CustomizationArea", "SkinsPanel");
+                }, "EditorArea", "SkinsPanel");
                 
                 container.Add(new CuiPanel
                 {
@@ -1381,6 +1381,13 @@ namespace Oxide.Plugins
                     Text = { Text = "WEAPON SKINS", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "0.9 0.8 1.0 1" },
                     RectTransform = { AnchorMin = "0 0.96", AnchorMax = "1 1" }
                 }, "SkinsPanel");
+                
+                // Scrollable content area for skins
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0 0 0 0" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.94" }
+                }, "SkinsPanel", "SkinsScroll");
                 
                 // Skins list
                 var allSkins = new[]
@@ -1396,8 +1403,8 @@ namespace Oxide.Plugins
                 for (int i = 0; i < availableSkins.Length; i++)
                 {
                     var skin = availableSkins[i];
-                    float yMin = 0.88f - (i * 0.30f);
-                    float yMax = yMin + 0.26f;
+                    float yMin = 0.96f - ((i + 1) * 0.20f);
+                    float yMax = yMin + 0.18f;
                     
                     bool isOwned = session.Profile.OwnedSkins.Contains(skin.Id);
                     bool isEquipped = loadout.Skins.TryGetValue(skin.Weapon, out string equippedSkin) && equippedSkin == skin.Id;
@@ -1406,7 +1413,7 @@ namespace Oxide.Plugins
                     {
                         Image = { Color = isOwned ? "0.14 0.14 0.18 1" : "0.10 0.10 0.14 0.5" },
                         RectTransform = { AnchorMin = $"0.03 {yMin}", AnchorMax = $"0.97 {yMax}" }
-                    }, "SkinsPanel", $"SkinCard_{i}");
+                    }, "SkinsScroll", $"SkinCard_{i}");
                     
                     if (isEquipped)
                     {
@@ -1420,7 +1427,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = skin.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.45", AnchorMax = "0.95 0.68" }
+                        RectTransform = { AnchorMin = "0.05 0.70", AnchorMax = "0.95 0.90" }
                     }, $"SkinCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
@@ -1429,17 +1436,16 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.25", AnchorMax = "0.50 0.38" }
+                        RectTransform = { AnchorMin = "0.05 0.50", AnchorMax = "0.50 0.68" }
                     }, $"SkinCard_{i}");
                     
-                    // Always show a button
                     if (isEquipped)
                     {
                         container.Add(new CuiButton
                         {
                             Button = { Command = "", Color = "0.2 0.6 0.2 0.5" },
                             Text = { Text = "EQUIPPED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.8 1 0.8 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
+                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                     else if (isOwned)
@@ -1448,7 +1454,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = $"killadome.applyskin {editingSlot} {skin.Id}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
+                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                     else
@@ -1457,17 +1463,17 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = "", Color = "0.15 0.15 0.15 0.5" },
                             Text = { Text = "LOCKED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.5 0.5 0.5 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
+                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                 }
                 
-                // RIGHT: ATTACHMENTS
+                // RIGHT PANEL - ATTACHMENTS (with scrolling)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.10 0.10 0.14 0.95" },
                     RectTransform = { AnchorMin = "0.51 0.02", AnchorMax = "0.98 0.93" }
-                }, "CustomizationArea", "AttachmentsPanel");
+                }, "EditorArea", "AttachmentsPanel");
                 
                 container.Add(new CuiPanel
                 {
@@ -1503,6 +1509,13 @@ namespace Oxide.Plugins
                     }, "AttachmentsPanel");
                 }
                 
+                // Scrollable content area for attachments
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0 0 0 0" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.89" }
+                }, "AttachmentsPanel", "AttachmentsScroll");
+                
                 // Attachments list
                 var allAttachments = new[]
                 {
@@ -1528,13 +1541,13 @@ namespace Oxide.Plugins
                     {
                         Text = { Text = "No attachments owned in this category.\nPurchase attachments in the Store Tab.", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "0.6 0.6 0.6 1" },
                         RectTransform = { AnchorMin = "0.1 0.35", AnchorMax = "0.9 0.65" }
-                    }, "AttachmentsPanel");
+                    }, "AttachmentsScroll");
                 }
                 
                 for (int i = 0; i < availableAttachments.Length; i++)
                 {
                     var att = availableAttachments[i];
-                    float yMin = 0.88f - (i * 0.22f);
+                    float yMin = 0.96f - ((i + 1) * 0.20f);
                     float yMax = yMin + 0.18f;
                     
                     var attachments = editingSlot == "primary" ? loadout.PrimaryAttachments : loadout.SecondaryAttachments;
@@ -1544,7 +1557,7 @@ namespace Oxide.Plugins
                     {
                         Image = { Color = "0.14 0.14 0.18 1" },
                         RectTransform = { AnchorMin = $"0.03 {yMin}", AnchorMax = $"0.97 {yMax}" }
-                    }, "AttachmentsPanel", $"AttCard_{i}");
+                    }, "AttachmentsScroll", $"AttCard_{i}");
                     
                     if (isEquipped)
                     {
@@ -1558,7 +1571,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = att.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.45", AnchorMax = "0.95 0.68" }
+                        RectTransform = { AnchorMin = "0.05 0.70", AnchorMax = "0.95 0.90" }
                     }, $"AttCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : "OWNED";
@@ -1567,17 +1580,16 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.25", AnchorMax = "0.50 0.38" }
+                        RectTransform = { AnchorMin = "0.05 0.50", AnchorMax = "0.50 0.68" }
                     }, $"AttCard_{i}");
                     
-                    // Show button based on status
                     if (isEquipped)
                     {
                         container.Add(new CuiButton
                         {
                             Button = { Command = "", Color = "0.2 0.6 0.2 0.5" },
                             Text = { Text = "EQUIPPED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.8 1 0.8 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
+                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
                         }, $"AttCard_{i}");
                     }
                     else
@@ -1586,17 +1598,29 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = $"killadome.applyattachment {editingSlot} {att.Category} {att.Id}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
+                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
                         }, $"AttCard_{i}");
                     }
                 }
                 
-                // FOOTER
+                // === FOOTER === (6% height)
                 container.Add(new CuiPanel
                 {
                     Image = { Color = "0.08 0.08 0.12 0.9" },
-                    RectTransform = { AnchorMin = "0.05 0.02", AnchorMax = "0.95 0.06" }
+                    RectTransform = { AnchorMin = "0.05 0.01", AnchorMax = "0.95 0.06" }
                 }, UI_TAB_CONTAINER, "LoadoutFooter");
+                
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "1 0.6 0.2 0.6" },
+                    RectTransform = { AnchorMin = "0 0.90", AnchorMax = "1 1" }
+                }, "LoadoutFooter");
+                
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "Select weapons | Customize with skins and attachments | Purchase items in Store Tab", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "0.8 0.8 0.8 1" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.90" }
+                }, "LoadoutFooter");
                 
                 container.Add(new CuiPanel
                 {

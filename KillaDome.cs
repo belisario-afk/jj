@@ -1194,20 +1194,6 @@ namespace Oxide.Plugins
             
             private void ShowLoadoutsTab(CuiElementContainer container, BasePlayer player)
             {
-                // Title with rust orange color and letter spacing
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = "L O A D O U T   E D I T O R", FontSize = 24, Align = TextAnchor.MiddleCenter, Color = "1 0.54 0 1" },
-                    RectTransform = { AnchorMin = "0.3 0.85", AnchorMax = "0.7 0.92" }
-                }, UI_TAB_CONTAINER);
-                
-                // Thin orange underline with glow effect
-                container.Add(new CuiPanel
-                {
-                    Image = { Color = "1 0.54 0 0.8" },
-                    RectTransform = { AnchorMin = "0.35 0.845", AnchorMax = "0.65 0.847" }
-                }, UI_TAB_CONTAINER);
-                
                 var session = _plugin.GetSession(player.userID);
                 if (session == null)
                 {
@@ -1233,79 +1219,140 @@ namespace Oxide.Plugins
                 
                 var loadout = session.Profile.Loadouts[0];
                 
-                // PRIMARY WEAPON SECTION (Left, improved)
+                // ===== HEADER SECTION WITH GRADIENT =====
+                // Gradient background for header
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "0.11 0.11 0.11 0.95" },
-                    RectTransform = { AnchorMin = "0.12 0.67", AnchorMax = "0.48 0.82" }
-                }, UI_TAB_CONTAINER);
+                    Image = { Color = "0.08 0.08 0.12 0.95" },
+                    RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.95" }
+                }, UI_TAB_CONTAINER, "LoadoutHeader");
                 
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = "P R I M A R Y", FontSize = 14, Align = TextAnchor.UpperCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.12 0.79", AnchorMax = "0.48 0.82" }
-                }, UI_TAB_CONTAINER);
-                
-                // Current primary weapon with larger text
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = loadout.Primary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.12 0.72", AnchorMax = "0.48 0.78" }
-                }, UI_TAB_CONTAINER);
-                
-                // PREV button for primary
-                container.Add(new CuiButton
-                {
-                    Button = { Command = "killadome.weapon.prev primary", Color = "0.35 0.35 0.38 1" },
-                    Text = { Text = "◄ PREV", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.14 0.68", AnchorMax = "0.26 0.72" }
-                }, UI_TAB_CONTAINER);
-                
-                // NEXT button for primary
-                container.Add(new CuiButton
-                {
-                    Button = { Command = "killadome.weapon.next primary", Color = "0.35 0.35 0.38 1" },
-                    Text = { Text = "NEXT ►", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.34 0.68", AnchorMax = "0.46 0.72" }
-                }, UI_TAB_CONTAINER);
-                
-                // SECONDARY WEAPON SECTION (Right, improved)
+                // Top accent line (orange glow)
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "0.11 0.11 0.11 0.95" },
-                    RectTransform = { AnchorMin = "0.52 0.67", AnchorMax = "0.88 0.82" }
-                }, UI_TAB_CONTAINER);
+                    Image = { Color = "1 0.6 0.2 0.7" },
+                    RectTransform = { AnchorMin = "0 0.98", AnchorMax = "1 1" }
+                }, "LoadoutHeader");
+                
+                // Title with icon
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "⚔  L O A D O U T   E D I T O R  ⚔", FontSize = 26, Align = TextAnchor.MiddleCenter, Color = "1 0.9 0.7 1" },
+                    RectTransform = { AnchorMin = "0.15 0.2", AnchorMax = "0.85 0.9" }
+                }, "LoadoutHeader");
+                
+                // ===== WEAPON SELECTOR SECTION =====
+                // PRIMARY WEAPON CARD (Left)
+                string primaryCardName = "PrimaryWeaponCard";
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.10 0.10 0.14 0.95" },
+                    RectTransform = { AnchorMin = "0.05 0.73", AnchorMax = "0.48 0.86" }
+                }, UI_TAB_CONTAINER, primaryCardName);
+                
+                // Glow border for primary
+                container.Add(new CuiElement
+                {
+                    Parent = primaryCardName,
+                    Components =
+                    {
+                        new CuiImageComponent { Color = "0.3 0.3 0.3 0.0" },
+                        new CuiOutlineComponent { Color = "1 0.6 0.2 0.6", Distance = "2 -2" },
+                        new CuiRectTransformComponent { AnchorMin = "0 0", AnchorMax = "1 1" }
+                    }
+                });
+                
+                // Header bar
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.15 0.10 0.05 0.9" },
+                    RectTransform = { AnchorMin = "0 0.80", AnchorMax = "1 1" }
+                }, primaryCardName);
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = "S E C O N D A R Y", FontSize = 14, Align = TextAnchor.UpperCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.52 0.79", AnchorMax = "0.88 0.82" }
-                }, UI_TAB_CONTAINER);
+                    Text = { Text = "⚔  P R I M A R Y", FontSize = 16, Align = TextAnchor.MiddleCenter, Color = "1 0.8 0.5 1" },
+                    RectTransform = { AnchorMin = "0 0.80", AnchorMax = "1 1" }
+                }, primaryCardName);
                 
-                // Current secondary weapon
+                // Weapon display
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = loadout.Secondary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.52 0.72", AnchorMax = "0.88 0.78" }
-                }, UI_TAB_CONTAINER);
+                    Text = { Text = loadout.Primary.ToUpper(), FontSize = 24, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.1 0.40", AnchorMax = "0.9 0.75" }
+                }, primaryCardName);
                 
-                // PREV button for secondary
+                // Navigation buttons
                 container.Add(new CuiButton
                 {
-                    Button = { Command = "killadome.weapon.prev secondary", Color = "0.35 0.35 0.38 1" },
-                    Text = { Text = "◄ PREV", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.54 0.68", AnchorMax = "0.66 0.72" }
-                }, UI_TAB_CONTAINER);
+                    Button = { Command = "killadome.weapon.prev primary", Color = "0.2 0.5 0.7 0.8" },
+                    Text = { Text = "◄ PREV", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.1 0.10", AnchorMax = "0.45 0.30" }
+                }, primaryCardName);
                 
-                // NEXT button for secondary
                 container.Add(new CuiButton
                 {
-                    Button = { Command = "killadome.weapon.next secondary", Color = "0.35 0.35 0.38 1" },
-                    Text = { Text = "NEXT ►", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.74 0.68", AnchorMax = "0.86 0.72" }
-                }, UI_TAB_CONTAINER);
+                    Button = { Command = "killadome.weapon.next primary", Color = "0.2 0.5 0.7 0.8" },
+                    Text = { Text = "NEXT ►", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.55 0.10", AnchorMax = "0.9 0.30" }
+                }, primaryCardName);
                 
-                // WEAPON SLOT SELECTOR - Shows which weapon is being edited
+                // SECONDARY WEAPON CARD (Right)
+                string secondaryCardName = "SecondaryWeaponCard";
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.10 0.10 0.14 0.95" },
+                    RectTransform = { AnchorMin = "0.52 0.73", AnchorMax = "0.95 0.86" }
+                }, UI_TAB_CONTAINER, secondaryCardName);
+                
+                // Glow border for secondary
+                container.Add(new CuiElement
+                {
+                    Parent = secondaryCardName,
+                    Components =
+                    {
+                        new CuiImageComponent { Color = "0.3 0.3 0.3 0.0" },
+                        new CuiOutlineComponent { Color = "0.5 0.7 1.0 0.6", Distance = "2 -2" },
+                        new CuiRectTransformComponent { AnchorMin = "0 0", AnchorMax = "1 1" }
+                    }
+                });
+                
+                // Header bar
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.05 0.10 0.15 0.9" },
+                    RectTransform = { AnchorMin = "0 0.80", AnchorMax = "1 1" }
+                }, secondaryCardName);
+                
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "🔫  S E C O N D A R Y", FontSize = 16, Align = TextAnchor.MiddleCenter, Color = "0.7 0.9 1.0 1" },
+                    RectTransform = { AnchorMin = "0 0.80", AnchorMax = "1 1" }
+                }, secondaryCardName);
+                
+                // Weapon display
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = loadout.Secondary.ToUpper(), FontSize = 24, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.1 0.40", AnchorMax = "0.9 0.75" }
+                }, secondaryCardName);
+                
+                // Navigation buttons
+                container.Add(new CuiButton
+                {
+                    Button = { Command = "killadome.weapon.prev secondary", Color = "0.5 0.3 0.7 0.8" },
+                    Text = { Text = "◄ PREV", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.1 0.10", AnchorMax = "0.45 0.30" }
+                }, secondaryCardName);
+                
+                container.Add(new CuiButton
+                {
+                    Button = { Command = "killadome.weapon.next secondary", Color = "0.5 0.3 0.7 0.8" },
+                    Text = { Text = "NEXT ►", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    RectTransform = { AnchorMin = "0.55 0.10", AnchorMax = "0.9 0.30" }
+                }, secondaryCardName);
+                
+                // ===== WEAPON SLOT SELECTOR =====
                 string editingSlot = session.EditingWeaponSlot ?? "primary";
                 string currentWeapon = editingSlot == "primary" ? loadout.Primary : loadout.Secondary;
                 
@@ -1315,67 +1362,109 @@ namespace Oxide.Plugins
                     currentWeapon = editingSlot == "primary" ? "ak47" : "pistol";
                 }
                 
-                // Selector panel
+                // Selector background
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "0.11 0.11 0.11 0.95" },
-                    RectTransform = { AnchorMin = "0.12 0.60", AnchorMax = "0.88 0.65" }
-                }, UI_TAB_CONTAINER);
+                    Image = { Color = "0.08 0.08 0.12 0.9" },
+                    RectTransform = { AnchorMin = "0.05 0.67", AnchorMax = "0.95 0.71" }
+                }, UI_TAB_CONTAINER, "SlotSelector");
+                
+                // Accent line
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "1 0.6 0.2 0.3" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.05" }
+                }, "SlotSelector");
+                
+                // Label
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "⚙  EDITING", FontSize = 13, Align = TextAnchor.MiddleCenter, Color = "0.8 0.8 0.8 1" },
+                    RectTransform = { AnchorMin = "0.05 0.15", AnchorMax = "0.25 0.85" }
+                }, "SlotSelector");
+                
+                // PRIMARY toggle button
+                string primaryBg = editingSlot == "primary" ? "0.2 0.6 0.8" : "0.15 0.15 0.18";
+                string primaryText = editingSlot == "primary" ? "1 1 1" : "0.6 0.6 0.6";
+                
+                container.Add(new CuiButton
+                {
+                    Button = { Command = "killadome.editweapon primary", Color = $"{primaryBg} 0.9" },
+                    Text = { Text = "⚔ PRIMARY", FontSize = 14, Align = TextAnchor.MiddleCenter, Color = $"{primaryText} 1" },
+                    RectTransform = { AnchorMin = "0.30 0.15", AnchorMax = "0.48 0.85" }
+                }, "SlotSelector");
+                
+                // SECONDARY toggle button
+                string secondaryBg = editingSlot == "secondary" ? "0.5 0.3 0.8" : "0.15 0.15 0.18";
+                string secondaryText = editingSlot == "secondary" ? "1 1 1" : "0.6 0.6 0.6";
+                
+                container.Add(new CuiButton
+                {
+                    Button = { Command = "killadome.editweapon secondary", Color = $"{secondaryBg} 0.9" },
+                    Text = { Text = "🔫 SECONDARY", FontSize = 14, Align = TextAnchor.MiddleCenter, Color = $"{secondaryText} 1" },
+                    RectTransform = { AnchorMin = "0.52 0.15", AnchorMax = "0.70 0.85" }
+                }, "SlotSelector");
+                
+                // Current weapon display
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.12 0.08 0.02 0.9" },
+                    RectTransform = { AnchorMin = "0.73 0.15", AnchorMax = "0.95 0.85" }
+                }, "SlotSelector", "CurrentWeaponDisplay");
+                
+                // Glow border
+                container.Add(new CuiElement
+                {
+                    Parent = "CurrentWeaponDisplay",
+                    Components =
+                    {
+                        new CuiImageComponent { Color = "1 0.6 0 0.0" },
+                        new CuiOutlineComponent { Color = "1 0.6 0 0.6", Distance = "1 -1" },
+                        new CuiRectTransformComponent { AnchorMin = "0 0", AnchorMax = "1 1" }
+                    }
+                });
                 
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = "E D I T I N G", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = "0.7 0.7 0.7 1" },
-                    RectTransform = { AnchorMin = "0.12 0.625", AnchorMax = "0.30 0.65" }
-                }, UI_TAB_CONTAINER);
+                    Text = { Text = $"▸ {currentWeapon.ToUpper()}", FontSize = 13, Align = TextAnchor.MiddleCenter, Color = "1 0.9 0.7 1" },
+                    RectTransform = { AnchorMin = "0.05 0", AnchorMax = "0.95 1" }
+                }, "CurrentWeaponDisplay");
                 
-                // PRIMARY button
-                string primaryColor = editingSlot == "primary" ? "1 0.54 0 1" : "0.25 0.25 0.25 1";
-                string primaryTextColor = editingSlot == "primary" ? "1 1 1 1" : "0.7 0.7 0.7 1";
-                container.Add(new CuiButton
-                {
-                    Button = { Command = "killadome.editweapon primary", Color = primaryColor },
-                    Text = { Text = "PRIMARY", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = primaryTextColor },
-                    RectTransform = { AnchorMin = "0.32 0.605", AnchorMax = "0.48 0.645" }
-                }, UI_TAB_CONTAINER);
-                
-                // SECONDARY button
-                string secondaryColor = editingSlot == "secondary" ? "1 0.54 0 1" : "0.25 0.25 0.25 1";
-                string secondaryTextColor = editingSlot == "secondary" ? "1 1 1 1" : "0.7 0.7 0.7 1";
-                container.Add(new CuiButton
-                {
-                    Button = { Command = "killadome.editweapon secondary", Color = secondaryColor },
-                    Text = { Text = "SECONDARY", FontSize = 12, Align = TextAnchor.MiddleCenter, Color = secondaryTextColor },
-                    RectTransform = { AnchorMin = "0.52 0.605", AnchorMax = "0.68 0.645" }
-                }, UI_TAB_CONTAINER);
-                
-                // Show current weapon being edited
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = $"[ {currentWeapon.ToUpper()} ]", FontSize = 14, Align = TextAnchor.MiddleCenter, Color = "1 0.54 0 1" },
-                    RectTransform = { AnchorMin = "0.70 0.605", AnchorMax = "0.88 0.645" }
-                }, UI_TAB_CONTAINER);
-                
-                // NEW SECTION: SKINS & ATTACHMENTS EDITOR
-                // Main container with border (adjusted height to accommodate weapon selector)
+                // ===== SKINS & ATTACHMENTS EDITOR SECTION =====
+                // Main container with modern gradient
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "0.11 0.11 0.11 0.95" },
-                    RectTransform = { AnchorMin = "0.12 0.15", AnchorMax = "0.88 0.58" }
+                    Image = { Color = "0.06 0.06 0.08 0.90" },
+                    RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.65" }
                 }, UI_TAB_CONTAINER, "LoadoutEditorMain");
                 
-                // LEFT PANEL - SKINS
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = "S K I N S", FontSize = 16, Align = TextAnchor.UpperCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.02 0.92", AnchorMax = "0.48 0.97" }
-                }, "LoadoutEditorMain");
-                
-                // Orange underline for SKINS
+                // Decorative top border
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "1 0.54 0 0.8" },
-                    RectTransform = { AnchorMin = "0.15 0.915", AnchorMax = "0.35 0.918" }
+                    Image = { Color = "1 0.6 0.2 0.4" },
+                    RectTransform = { AnchorMin = "0 0.98", AnchorMax = "1 1" }
                 }, "LoadoutEditorMain");
+                
+                // ===== LEFT PANEL - SKINS =====
+                // Header bar for skins
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.15 0.10 0.20 0.9" },
+                    RectTransform = { AnchorMin = "0.02 0.93", AnchorMax = "0.48 0.98" }
+                }, "LoadoutEditorMain", "SkinsHeader");
+                
+                // Decorative accent
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.6 0.4 1.0 0.4" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.02 1" }
+                }, "SkinsHeader");
+                
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "🎨  S K I N S", FontSize = 18, Align = TextAnchor.MiddleCenter, Color = "0.9 0.8 1.0 1" },
+                    RectTransform = { AnchorMin = "0.05 0", AnchorMax = "0.95 1" }
+                }, "SkinsHeader");
                 
                 // Available skins grid - filter by currently edited weapon
                 var allSkins = new[]
@@ -1484,38 +1573,58 @@ namespace Oxide.Plugins
                     }
                 }
                 
-                // RIGHT PANEL - ATTACHMENTS
-                container.Add(new CuiLabel
-                {
-                    Text = { Text = "A T T A C H M E N T S", FontSize = 16, Align = TextAnchor.UpperCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.52 0.92", AnchorMax = "0.98 0.97" }
-                }, "LoadoutEditorMain");
-                
-                // Orange underline for ATTACHMENTS
+                // ===== RIGHT PANEL - ATTACHMENTS =====
+                // Header bar for attachments
                 container.Add(new CuiPanel
                 {
-                    Image = { Color = "1 0.54 0 0.8" },
-                    RectTransform = { AnchorMin = "0.62 0.915", AnchorMax = "0.88 0.918" }
-                }, "LoadoutEditorMain");
+                    Image = { Color = "0.10 0.15 0.20 0.9" },
+                    RectTransform = { AnchorMin = "0.52 0.93", AnchorMax = "0.98 0.98" }
+                }, "LoadoutEditorMain", "AttachmentsHeader");
                 
-                // Attachment category tabs (3 tabs: Scopes, Silencers/Muzzle, Underbarrel)
+                // Decorative accent
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.4 0.8 1.0 0.4" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "0.02 1" }
+                }, "AttachmentsHeader");
+                
+                container.Add(new CuiLabel
+                {
+                    Text = { Text = "⚙  A T T A C H M E N T S", FontSize = 18, Align = TextAnchor.MiddleCenter, Color = "0.7 1.0 1.0 1" },
+                    RectTransform = { AnchorMin = "0.05 0", AnchorMax = "0.95 1" }
+                }, "AttachmentsHeader");
+                
+                // Attachment category tabs with modern design
                 string selectedCategory = session.SelectedAttachmentCategory ?? "scopes";
                 string[] categories = { "SCOPES", "SILENCERS", "UNDERBARREL" };
+                string[] categoryIcons = { "🔭", "🔇", "🎯" };
+                
                 for (int i = 0; i < categories.Length; i++)
                 {
-                    float xMin = 0.52f + (i * 0.15f);
-                    float xMax = xMin + 0.14f;
+                    float xMin = 0.52f + (i * 0.155f);
+                    float xMax = xMin + 0.145f;
                     
                     bool isSelected = categories[i].ToLower() == selectedCategory;
-                    string buttonColor = isSelected ? "1 0.54 0 0.8" : "0.2 0.2 0.2 0.8";
-                    string textColor = isSelected ? "1 1 1 1" : "0.7 0.7 0.7 1";
+                    string buttonBg = isSelected ? "0.2 0.6 0.8" : "0.12 0.12 0.15";
+                    string textColor = isSelected ? "1 1 1" : "0.6 0.6 0.6";
                     
+                    string tabName = $"AttachTab_{i}";
                     container.Add(new CuiButton
                     {
-                        Button = { Command = $"killadome.attachcat {categories[i].ToLower()}", Color = buttonColor },
-                        Text = { Text = categories[i], FontSize = 9, Align = TextAnchor.MiddleCenter, Color = textColor },
-                        RectTransform = { AnchorMin = $"{xMin} 0.87", AnchorMax = $"{xMax} 0.91" }
-                    }, "LoadoutEditorMain");
+                        Button = { Command = $"killadome.attachcat {categories[i].ToLower()}", Color = $"{buttonBg} 0.9" },
+                        Text = { Text = $"{categoryIcons[i]} {categories[i]}", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = $"{textColor} 1" },
+                        RectTransform = { AnchorMin = $"{xMin} 0.88", AnchorMax = $"{xMax} 0.92" }
+                    }, "LoadoutEditorMain", tabName);
+                    
+                    // Active indicator
+                    if (isSelected)
+                    {
+                        container.Add(new CuiPanel
+                        {
+                            Image = { Color = "0.3 0.8 1.0 0.8" },
+                            RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.05" }
+                        }, tabName);
+                    }
                 }
                 
                 // Available attachments with actual Rust mod item short names
@@ -1645,12 +1754,26 @@ namespace Oxide.Plugins
                     }
                 }
                 
-                // Bottom help text
+                // ===== FOOTER INFO BAR =====
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "0.08 0.08 0.12 0.9" },
+                    RectTransform = { AnchorMin = "0.05 0.02", AnchorMax = "0.95 0.06" }
+                }, UI_TAB_CONTAINER, "LoadoutFooter");
+                
+                // Bottom accent line
+                container.Add(new CuiPanel
+                {
+                    Image = { Color = "1 0.6 0.2 0.4" },
+                    RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.05" }
+                }, "LoadoutFooter");
+                
+                // Help text with icon
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = "Select a skin or attachment to equip it on your current weapon", FontSize = 10, Align = TextAnchor.MiddleCenter, Color = "0.7 0.7 0.7 1" },
-                    RectTransform = { AnchorMin = "0.2 0.10", AnchorMax = "0.8 0.14" }
-                }, UI_TAB_CONTAINER);
+                    Text = { Text = "💡 Select a weapon above, then equip skins and attachments from the editor  |  Purchase items from the Store tab", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "0.8 0.9 1.0 0.9" },
+                    RectTransform = { AnchorMin = "0.05 0.2", AnchorMax = "0.95 0.95" }
+                }, "LoadoutFooter");
             }
             
             private void ShowStoreTab(CuiElementContainer container, BasePlayer player)

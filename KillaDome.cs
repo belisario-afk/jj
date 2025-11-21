@@ -1420,7 +1420,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = skin.Name, FontSize = 10, Align = TextAnchor.UpperLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.65", AnchorMax = "0.95 0.95" }
+                        RectTransform = { AnchorMin = "0.05 0.60", AnchorMax = "0.95 0.90" }
                     }, $"SkinCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
@@ -1429,7 +1429,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.UpperLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.40", AnchorMax = "0.50 0.60" }
+                        RectTransform = { AnchorMin = "0.05 0.35", AnchorMax = "0.50 0.55" }
                     }, $"SkinCard_{i}");
                     
                     if (isOwned && !isEquipped)
@@ -1527,7 +1527,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = att.Name, FontSize = 10, Align = TextAnchor.UpperLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.55", AnchorMax = "0.95 0.95" }
+                        RectTransform = { AnchorMin = "0.05 0.50", AnchorMax = "0.95 0.90" }
                     }, $"AttCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
@@ -1536,7 +1536,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.UpperLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.25", AnchorMax = "0.50 0.50" }
+                        RectTransform = { AnchorMin = "0.05 0.20", AnchorMax = "0.50 0.45" }
                     }, $"AttCard_{i}");
                     
                     if (isOwned && !isEquipped)

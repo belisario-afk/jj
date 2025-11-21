@@ -54,9 +54,9 @@ namespace Oxide.Plugins
         private Dictionary<ulong, PlayerSession> _activeSessions = new Dictionary<ulong, PlayerSession>();
         
         // Phase 4: Weapon modifier tracking
-        private Dictionary<uint, WeaponModifierState> _activeWeaponModifiers = new Dictionary<uint, WeaponModifierState>();
+        private Dictionary<NetworkableId, WeaponModifierState> _activeWeaponModifiers = new Dictionary<NetworkableId, WeaponModifierState>();
         private Dictionary<ulong, float> _playerMovementModifiers = new Dictionary<ulong, float>();
-        private Dictionary<uint, DateTime> _lastEffectTime = new Dictionary<uint, DateTime>();
+        private Dictionary<NetworkableId, DateTime> _lastEffectTime = new Dictionary<NetworkableId, DateTime>();
         
         private const string PERMISSION_ADMIN = "killadome.admin";
         private const string PERMISSION_VIP = "killadome.vip";
@@ -366,7 +366,7 @@ namespace Oxide.Plugins
                 return;
             
             // Throttle effects to prevent spam (50ms minimum between plays)
-            uint weaponId = projectile.net.ID;
+            NetworkableId weaponId = projectile.net.ID;
             if (_lastEffectTime.TryGetValue(weaponId, out var lastTime))
             {
                 if ((DateTime.UtcNow - lastTime).TotalMilliseconds < 50)
@@ -676,7 +676,7 @@ namespace Oxide.Plugins
             _playerMovementModifiers.Remove(player.userID);
             
             // Clear weapon modifiers for this player's weapons
-            var itemsToRemove = new List<uint>();
+            var itemsToRemove = new List<NetworkableId>();
             foreach (var modEntry in _activeWeaponModifiers)
             {
                 // Check if weapon belongs to this player

@@ -53,6 +53,11 @@ namespace Oxide.Plugins
         private PluginConfig _config;
         private Dictionary<ulong, PlayerSession> _activeSessions = new Dictionary<ulong, PlayerSession>();
         
+        // Phase 4: Weapon modifier tracking
+        private Dictionary<uint, WeaponModifierState> _activeWeaponModifiers = new Dictionary<uint, WeaponModifierState>();
+        private Dictionary<ulong, float> _playerMovementModifiers = new Dictionary<ulong, float>();
+        private Dictionary<uint, DateTime> _lastEffectTime = new Dictionary<uint, DateTime>();
+        
         private const string PERMISSION_ADMIN = "killadome.admin";
         private const string PERMISSION_VIP = "killadome.vip";
         
@@ -224,8 +229,22 @@ namespace Oxide.Plugins
                 // Track telemetry
                 _telemetry.RecordKill(attacker.userID, victim.userID);
                 
+                // Phase 4: Apply OnKillHP healing
+                var weapon = attacker.GetActiveItem()?.GetHeldEntity() as BaseProjectile;
+                if (weapon != null && _activeWeaponModifiers.TryGetValue(weapon.net.ID, out var stats))
+                {
+                    if (stats.OnKillHP > 0)
+                    {
+                        attacker.Heal(stats.OnKillHP);
+                        LogDebug($"{attacker.displayName} healed {stats.OnKillHP} HP on kill");
+                    }
+                }
+                
                 LogDebug($"{attacker.displayName} killed {victim.displayName}");
             }
+            
+            // Cleanup modifiers for victim
+            CleanupWeaponModifiers(victim);
             
             // Respawn victim in lobby after delay
             timer.Once(3f, () =>
@@ -238,6 +257,144 @@ namespace Oxide.Plugins
             });
         }
         
+        // Phase 4: Handle OnHitHP, BleedChance, StaggerChance
+        private void OnPlayerAttack(BasePlayer attacker, HitInfo info)
+        {
+            if (attacker == null || info?.HitEntity == null) return;
+            
+            var weapon = attacker.GetActiveItem()?.GetHeldEntity() as BaseProjectile;
+            if (weapon == null) return;
+            
+            if (!_activeWeaponModifiers.TryGetValue(weapon.net.ID, out var stats))
+                return;
+            
+            // Apply OnHitHP healing
+            if (stats.OnHitHP > 0)
+            {
+                attacker.Heal(stats.OnHitHP);
+                LogDebug($"{attacker.displayName} healed {stats.OnHitHP} HP on hit");
+            }
+            
+            // Apply BleedChance
+            if (stats.BleedChance > 0 && UnityEngine.Random.value <= stats.BleedChance)
+            {
+                var victim = info.HitEntity as BasePlayer;
+                if (victim != null)
+                {
+                    victim.metabolism.bleeding.Add(10f);
+                    LogDebug($"{attacker.displayName} applied bleed to {victim.displayName}");
+                }
+            }
+            
+            // Apply StaggerChance
+            if (stats.StaggerChance > 0 && UnityEngine.Random.value <= stats.StaggerChance)
+            {
+                var victim = info.HitEntity as BasePlayer;
+                if (victim != null)
+                {
+                    // Apply movement slow effect
+                    victim.metabolism.SendChangesToClient();
+                    timer.Once(2f, () => {
+                        // Remove slow after 2 seconds (implemented via metabolism)
+                        if (victim != null && victim.IsConnected)
+                        {
+                            victim.metabolism.SendChangesToClient();
+                        }
+                    });
+                    LogDebug($"{attacker.displayName} staggered {victim.displayName}");
+                }
+            }
+        }
+        
+        // Phase 4: Cleanup modifiers on respawn
+        private void OnPlayerRespawn(BasePlayer player)
+        {
+            if (player == null) return;
+            CleanupWeaponModifiers(player);
+        }
+        
+        // Phase 5: Hook weapon fire event for VFX/SFX
+        private void OnWeaponFired(BaseProjectile projectile, BasePlayer player, ItemModProjectile mod, ProtoBuf.ProjectileShoot projectiles)
+        {
+            if (projectile == null || player == null) return;
+            
+            // Check if this weapon has special effects enabled
+            if (!_activeWeaponModifiers.TryGetValue(projectile.net.ID, out var stats))
+                return;
+            
+            // Throttle effects to prevent spam (50ms minimum between plays)
+            uint weaponId = projectile.net.ID;
+            if (_lastEffectTime.TryGetValue(weaponId, out var lastTime))
+            {
+                if ((DateTime.UtcNow - lastTime).TotalMilliseconds < 50)
+                    return;
+            }
+            _lastEffectTime[weaponId] = DateTime.UtcNow;
+            
+            // Get muzzle position
+            Vector3 position = GetMuzzlePosition(player, projectile);
+            
+            // Play effects based on equipped attachments
+            if (stats.HasSodaCanVFX)
+            {
+                PlaySodaCanEffects(position);
+            }
+            
+            if (stats.HasBrakeVFX)
+            {
+                PlayBrakeEffects(position);
+            }
+        }
+        
+        // Phase 5: Soda Can Silencer effects
+        private void PlaySodaCanEffects(Vector3 position)
+        {
+            // VFX: Smoke effect at muzzle
+            Effect.server.Run(
+                "assets/bundled/prefabs/fx/smoke_small.prefab",
+                position,
+                Vector3.forward
+            );
+            
+            // SFX: Ricochet sound
+            Effect.server.Run(
+                "assets/bundled/prefabs/fx/ricochet/ricochet1.prefab",
+                position
+            );
+        }
+        
+        // Phase 5: Muzzle Brake effects
+        private void PlayBrakeEffects(Vector3 position)
+        {
+            // VFX: Enhanced muzzle flash
+            Effect.server.Run(
+                "assets/bundled/prefabs/fx/weapons/muzzleflash/muzzleflash1.prefab",
+                position,
+                Vector3.forward
+            );
+            
+            // SFX: Echo sound (using explosion sound as substitute)
+            Effect.server.Run(
+                "assets/bundled/prefabs/fx/explosions/explosion_01.prefab",
+                position
+            );
+        }
+        
+        // Phase 5: Calculate accurate muzzle position
+        private Vector3 GetMuzzlePosition(BasePlayer player, BaseProjectile weapon)
+        {
+            if (weapon == null)
+                return player.eyes.position;
+            
+            // Use weapon's muzzle bone if available
+            var muzzleTransform = weapon.MuzzlePoint;
+            if (muzzleTransform != null)
+                return muzzleTransform.position;
+            
+            // Fallback to player eye position + forward offset
+            return player.eyes.position + player.eyes.HeadForward() * 0.5f;
+        }
+        
         #endregion
         
         #region Helper Methods
@@ -245,6 +402,10 @@ namespace Oxide.Plugins
         private void TeleportToLobby(BasePlayer player)
         {
             if (player == null || !player.IsConnected) return;
+            
+            // Cleanup weapon modifiers when leaving arena
+            CleanupWeaponModifiers(player);
+            
             player.Teleport(_config.LobbySpawnPosition);
         }
         
@@ -335,6 +496,9 @@ namespace Oxide.Plugins
                 heldItem.SendNetworkUpdate();
             }
             
+            // Phase 4: Apply weapon modifiers from Alter-Ego attachments
+            ApplyWeaponModifiers(player, item, attachments);
+            
             // Give ammo
             string ammoType = weaponName == "pistol" ? "ammo.pistol" : "ammo.rifle";
             var ammo = ItemManager.CreateByName(ammoType, 250);
@@ -342,6 +506,125 @@ namespace Oxide.Plugins
             {
                 player.inventory.GiveItem(ammo);
             }
+        }
+        
+        // Phase 4: Apply weapon modifiers from Alter-Ego attachments
+        private void ApplyWeaponModifiers(BasePlayer player, Item item, Dictionary<string, string> attachments)
+        {
+            if (attachments == null || attachments.Count == 0) return;
+            
+            var weapon = item.GetHeldEntity() as BaseProjectile;
+            if (weapon == null) return;
+            
+            // Collect equipped AE attachments
+            var equippedAttachments = new List<string>();
+            foreach (var attachmentEntry in attachments.Values)
+            {
+                if (!string.IsNullOrEmpty(attachmentEntry) && attachmentEntry.EndsWith("_AE"))
+                {
+                    equippedAttachments.Add(attachmentEntry);
+                }
+            }
+            
+            if (equippedAttachments.Count == 0) return;
+            
+            // Calculate combined stats using synergy engine
+            var session = GetSession(player.userID);
+            if (session == null) return;
+            
+            var stats = _alterEgoSystem.CalculateModifiers(attachments, session.Profile);
+            
+            // Apply stats to weapon instance
+            ApplyRecoilModifier(weapon, stats);
+            ApplyAimconeModifier(weapon, stats);
+            ApplyFireRateModifier(weapon, stats);
+            ApplyVelocityModifier(weapon, stats);
+            ApplyReloadSpeedModifier(weapon, stats);
+            
+            // Store modifiers for event handling
+            _activeWeaponModifiers[weapon.net.ID] = stats;
+            
+            // Store movement speed modifier for player
+            if (stats.MoveSpeedMul != 1.0f)
+            {
+                _playerMovementModifiers[player.userID] = stats.MoveSpeedMul;
+            }
+            
+            // Detect special VFX attachments
+            stats.HasSodaCanVFX = equippedAttachments.Contains("weapon.mod.sodacansilencer_AE");
+            stats.HasBrakeVFX = equippedAttachments.Contains("weapon.mod.muzzlebrake_AE");
+            
+            LogDebug($"Applied weapon modifiers to {weapon.ShortPrefabName}: Recoil={stats.RecoilMul:F2}, Aimcone={stats.AimconeMul:F2}, FireRate={stats.FireRateMul:F2}");
+        }
+        
+        private void ApplyRecoilModifier(BaseProjectile weapon, WeaponModifierState stats)
+        {
+            if (stats.RecoilMul != 1.0f && weapon.recoil != null)
+            {
+                weapon.recoil.recoilYawMin *= stats.RecoilMul;
+                weapon.recoil.recoilYawMax *= stats.RecoilMul;
+                weapon.recoil.recoilPitchMin *= stats.RecoilMul;
+                weapon.recoil.recoilPitchMax *= stats.RecoilMul;
+            }
+        }
+        
+        private void ApplyAimconeModifier(BaseProjectile weapon, WeaponModifierState stats)
+        {
+            if (stats.AimconeMul != 1.0f)
+            {
+                weapon.aimCone *= stats.AimconeMul;
+                weapon.hipAimCone *= stats.AimconeMul;
+            }
+        }
+        
+        private void ApplyFireRateModifier(BaseProjectile weapon, WeaponModifierState stats)
+        {
+            if (stats.FireRateMul != 1.0f)
+            {
+                weapon.repeatDelay /= stats.FireRateMul; // Lower delay = higher fire rate
+            }
+        }
+        
+        private void ApplyVelocityModifier(BaseProjectile weapon, WeaponModifierState stats)
+        {
+            if (stats.VelocityMul != 1.0f)
+            {
+                weapon.projectileVelocity *= stats.VelocityMul;
+            }
+        }
+        
+        private void ApplyReloadSpeedModifier(BaseProjectile weapon, WeaponModifierState stats)
+        {
+            if (stats.ReloadSpeedMul != 1.0f)
+            {
+                weapon.reloadTime *= stats.ReloadSpeedMul;
+            }
+        }
+        
+        private void CleanupWeaponModifiers(BasePlayer player)
+        {
+            // Clear player movement modifiers
+            _playerMovementModifiers.Remove(player.userID);
+            
+            // Clear weapon modifiers for this player's weapons
+            var itemsToRemove = new List<uint>();
+            foreach (var modEntry in _activeWeaponModifiers)
+            {
+                // Check if weapon belongs to this player
+                var entity = BaseNetworkable.serverEntities.Find(modEntry.Key);
+                if (entity == null || (entity as BaseProjectile)?.GetOwnerPlayer() == player)
+                {
+                    itemsToRemove.Add(modEntry.Key);
+                }
+            }
+            
+            foreach (var netId in itemsToRemove)
+            {
+                _activeWeaponModifiers.Remove(netId);
+                _lastEffectTime.Remove(netId);
+            }
+            
+            LogDebug($"Cleaned up weapon modifiers for {player.displayName}");
         }
         
         private void AutoSaveAllPlayers()

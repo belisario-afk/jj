@@ -1474,9 +1474,11 @@ namespace Oxide.Plugins
                     bool isSelected = categories[i].ToLower() == selectedCategory || 
                                      (categories[i] == "BARREL" && selectedCategory == "silencers");
                     
+                    string categoryCommand = categories[i] == "BARREL" ? "silencers" : categories[i].ToLower();
+                    
                     container.Add(new CuiButton
                     {
-                        Button = { Command = $"killadome.attachcat {(categories[i] == \"BARREL\" ? \"silencers\" : categories[i].ToLower())}", Color = isSelected ? "0.2 0.6 0.8 0.9" : "0.12 0.12 0.15 0.9" },
+                        Button = { Command = $"killadome.attachcat {categoryCommand}", Color = isSelected ? "0.2 0.6 0.8 0.9" : "0.12 0.12 0.15 0.9" },
                         Text = { Text = categories[i], FontSize = 9, Align = TextAnchor.MiddleCenter, Color = isSelected ? "1 1 1 1" : "0.6 0.6 0.6 1" },
                         RectTransform = { AnchorMin = $"{xMin} 0.91", AnchorMax = $"{xMax} 0.95" }
                     }, "AttachmentsPanel");

@@ -1521,6 +1521,16 @@ namespace Oxide.Plugins
                     .Where(a => a.Category == selectedCategory && session.Profile.OwnedSkins.Contains(a.Id))
                     .ToArray();
                 
+                // Show helpful message if no attachments owned in this category
+                if (availableAttachments.Length == 0)
+                {
+                    container.Add(new CuiLabel
+                    {
+                        Text = { Text = "No attachments owned in this category.\nPurchase attachments in the Store Tab.", FontSize = 11, Align = TextAnchor.MiddleCenter, Color = "0.6 0.6 0.6 1" },
+                        RectTransform = { AnchorMin = "0.1 0.35", AnchorMax = "0.9 0.65" }
+                    }, "AttachmentsPanel");
+                }
+                
                 for (int i = 0; i < availableAttachments.Length; i++)
                 {
                     var att = availableAttachments[i];

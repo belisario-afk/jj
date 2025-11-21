@@ -327,7 +327,29 @@ namespace Oxide.Plugins
             CleanupWeaponModifiers(player);
         }
         
+        // Phase 4: Apply movement speed modifiers
+        private void OnRunPlayerMetabolism(PlayerMetabolism metabolism, BaseCombatEntity entity, float delta)
+        {
+            var player = entity as BasePlayer;
+            if (player == null) return;
+            
+            if (_playerMovementModifiers.TryGetValue(player.userID, out float modifier))
+            {
+                if (modifier != 1.0f)
+                {
+                    // Apply movement speed modifier
+                    // Note: This requires access to player movement which may need additional hooks
+                    player.clothingMoveSpeedReduction *= modifier;
+                }
+            }
+        }
+        
         // Phase 5: Hook weapon fire event for VFX/SFX
+        // NOTE: OnWeaponFired is not a standard Rust/Oxide hook
+        // This would need to be implemented using OnPlayerInput + weapon state tracking
+        // or by using a third-party plugin that provides this hook
+        // Commenting out for now to avoid runtime errors
+        /*
         private void OnWeaponFired(BaseProjectile projectile, BasePlayer player, ItemModProjectile mod, ProtoBuf.ProjectileShoot projectiles)
         {
             if (projectile == null || player == null) return;
@@ -359,16 +381,24 @@ namespace Oxide.Plugins
                 PlayBrakeEffects(position);
             }
         }
+        */
         
         // Phase 5: Soda Can Silencer effects
         private void PlaySodaCanEffects(Vector3 position)
         {
-            // VFX: Smoke effect at muzzle (silencers produce smoke from trapped gases)
-            Effect.server.Run(
-                "assets/bundled/prefabs/fx/smoke_small.prefab",
-                position,
-                Vector3.forward
-            );
+            try
+            {
+                // VFX: Smoke effect at muzzle (silencers produce smoke from trapped gases)
+                Effect.server.Run(
+                    "assets/bundled/prefabs/fx/smoke_small.prefab",
+                    position,
+                    Vector3.forward
+                );
+            }
+            catch (Exception ex)
+            {
+                LogDebug($"Failed to play Soda Can VFX: {ex.Message}");
+            }
             
             // Note: No sound effect for silencers - they're meant to reduce sound
         }
@@ -376,18 +406,25 @@ namespace Oxide.Plugins
         // Phase 5: Muzzle Brake effects
         private void PlayBrakeEffects(Vector3 position)
         {
-            // VFX: Enhanced muzzle flash (brake redirects gases)
-            Effect.server.Run(
-                "assets/bundled/prefabs/fx/weapons/muzzleflash/muzzleflash1.prefab",
-                position,
-                Vector3.forward
-            );
-            
-            // SFX: Use weapon fire sound for echo effect
-            Effect.server.Run(
-                "assets/bundled/prefabs/fx/weapons/rifle/attack.prefab",
-                position
-            );
+            try
+            {
+                // VFX: Enhanced muzzle flash (brake redirects gases)
+                Effect.server.Run(
+                    "assets/bundled/prefabs/fx/weapons/muzzleflash/muzzleflash1.prefab",
+                    position,
+                    Vector3.forward
+                );
+                
+                // SFX: Use weapon fire sound for echo effect
+                Effect.server.Run(
+                    "assets/bundled/prefabs/fx/weapons/rifle/attack.prefab",
+                    position
+                );
+            }
+            catch (Exception ex)
+            {
+                LogDebug($"Failed to play Muzzle Brake effects: {ex.Message}");
+            }
         }
         
         // Phase 5: Calculate accurate muzzle position
@@ -640,9 +677,14 @@ namespace Oxide.Plugins
                 if (entity != null)
                 {
                     var weapon = entity as BaseProjectile;
-                    if (weapon?.GetOwnerPlayer() == player)
+                    if (weapon != null)
                     {
-                        itemsToRemove.Add(modEntry.Key);
+                        // Check ownership through the item's owner
+                        var item = weapon.GetItem();
+                        if (item?.GetOwnerPlayer() == player)
+                        {
+                            itemsToRemove.Add(modEntry.Key);
+                        }
                     }
                 }
                 else

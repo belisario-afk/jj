@@ -328,6 +328,12 @@ namespace Oxide.Plugins
         }
         
         // Phase 4: Apply movement speed modifiers
+        // NOTE: Applying movement speed modifiers in Rust is complex and requires a different approach
+        // This hook would compound the effect on every tick. A proper implementation would need:
+        // - Use of player.modifiers.Add() for temporary effects
+        // - Or OnPlayerTick to reapply a fixed modifier
+        // Commenting out for now to avoid issues
+        /*
         private void OnRunPlayerMetabolism(PlayerMetabolism metabolism, BaseCombatEntity entity, float delta)
         {
             var player = entity as BasePlayer;
@@ -343,6 +349,7 @@ namespace Oxide.Plugins
                 }
             }
         }
+        */
         
         // Phase 5: Hook weapon fire event for VFX/SFX
         // NOTE: OnWeaponFired is not a standard Rust/Oxide hook
@@ -596,6 +603,10 @@ namespace Oxide.Plugins
             
             var stats = _alterEgoSystem.CalculateModifiers(attachments, session.Profile);
             
+            // Detect special VFX attachments BEFORE storing
+            stats.HasSodaCanVFX = equippedAttachments.Contains("weapon.mod.sodacansilencer_AE");
+            stats.HasBrakeVFX = equippedAttachments.Contains("weapon.mod.muzzlebrake_AE");
+            
             // Apply stats to weapon instance
             ApplyRecoilModifier(weapon, stats);
             ApplyAimconeModifier(weapon, stats);
@@ -603,7 +614,7 @@ namespace Oxide.Plugins
             ApplyVelocityModifier(weapon, stats);
             ApplyReloadSpeedModifier(weapon, stats);
             
-            // Store modifiers for event handling
+            // Store modifiers for event handling (after VFX flags are set)
             _activeWeaponModifiers[weapon.net.ID] = stats;
             
             // Store movement speed modifier for player
@@ -611,10 +622,6 @@ namespace Oxide.Plugins
             {
                 _playerMovementModifiers[player.userID] = stats.MoveSpeedMul;
             }
-            
-            // Detect special VFX attachments
-            stats.HasSodaCanVFX = equippedAttachments.Contains("weapon.mod.sodacansilencer_AE");
-            stats.HasBrakeVFX = equippedAttachments.Contains("weapon.mod.muzzlebrake_AE");
             
             LogDebug($"Applied weapon modifiers to {weapon.ShortPrefabName}: Recoil={stats.RecoilMul:F2}, Aimcone={stats.AimconeMul:F2}, FireRate={stats.FireRateMul:F2}");
         }

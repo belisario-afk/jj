@@ -1275,10 +1275,21 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
                 }, "PrimaryBox");
                 
+                // Weapon image
+                container.Add(new CuiElement
+                {
+                    Parent = "PrimaryBox",
+                    Components =
+                    {
+                        new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", loadout.Primary) },
+                        new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
+                    }
+                });
+                
                 container.Add(new CuiLabel
                 {
                     Text = { Text = loadout.Primary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.35", AnchorMax = "0.95 0.75" }
+                    RectTransform = { AnchorMin = "0.05 0.12", AnchorMax = "0.95 0.28" }
                 }, "PrimaryBox");
                 
                 container.Add(new CuiButton
@@ -1314,10 +1325,21 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
                 }, "SecondaryBox");
                 
+                // Weapon image
+                container.Add(new CuiElement
+                {
+                    Parent = "SecondaryBox",
+                    Components =
+                    {
+                        new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", loadout.Secondary) },
+                        new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
+                    }
+                });
+                
                 container.Add(new CuiLabel
                 {
                     Text = { Text = loadout.Secondary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                    RectTransform = { AnchorMin = "0.05 0.35", AnchorMax = "0.95 0.75" }
+                    RectTransform = { AnchorMin = "0.05 0.12", AnchorMax = "0.95 0.28" }
                 }, "SecondaryBox");
                 
                 container.Add(new CuiButton
@@ -1424,10 +1446,21 @@ namespace Oxide.Plugins
                         }, $"SkinCard_{i}");
                     }
                     
+                    // Skin image
+                    container.Add(new CuiElement
+                    {
+                        Parent = $"SkinCard_{i}",
+                        Components =
+                        {
+                            new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", skin.ImageId) },
+                            new CuiRectTransformComponent { AnchorMin = "0.05 0.05", AnchorMax = "0.35 0.45" }
+                        }
+                    });
+                    
                     container.Add(new CuiLabel
                     {
                         Text = { Text = skin.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.70", AnchorMax = "0.95 0.90" }
+                        RectTransform = { AnchorMin = "0.40 0.70", AnchorMax = "0.95 0.90" }
                     }, $"SkinCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
@@ -1436,7 +1469,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.50", AnchorMax = "0.50 0.68" }
+                        RectTransform = { AnchorMin = "0.40 0.50", AnchorMax = "0.70 0.68" }
                     }, $"SkinCard_{i}");
                     
                     if (isEquipped)
@@ -1445,7 +1478,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = "", Color = "0.2 0.6 0.2 0.5" },
                             Text = { Text = "EQUIPPED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.8 1 0.8 1" },
-                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
+                            RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                     else if (isOwned)
@@ -1454,7 +1487,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = $"killadome.applyskin {editingSlot} {skin.Id}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
+                            RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                     else
@@ -1463,7 +1496,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = "", Color = "0.15 0.15 0.15 0.5" },
                             Text = { Text = "LOCKED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.5 0.5 0.5 1" },
-                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
+                            RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");
                     }
                 }
@@ -1568,10 +1601,21 @@ namespace Oxide.Plugins
                         }, $"AttCard_{i}");
                     }
                     
+                    // Attachment image
+                    container.Add(new CuiElement
+                    {
+                        Parent = $"AttCard_{i}",
+                        Components =
+                        {
+                            new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", att.ImageId) },
+                            new CuiRectTransformComponent { AnchorMin = "0.05 0.05", AnchorMax = "0.35 0.45" }
+                        }
+                    });
+                    
                     container.Add(new CuiLabel
                     {
                         Text = { Text = att.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.70", AnchorMax = "0.95 0.90" }
+                        RectTransform = { AnchorMin = "0.40 0.70", AnchorMax = "0.95 0.90" }
                     }, $"AttCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : "OWNED";
@@ -1580,7 +1624,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.50", AnchorMax = "0.50 0.68" }
+                        RectTransform = { AnchorMin = "0.40 0.50", AnchorMax = "0.70 0.68" }
                     }, $"AttCard_{i}");
                     
                     if (isEquipped)
@@ -1589,7 +1633,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = "", Color = "0.2 0.6 0.2 0.5" },
                             Text = { Text = "EQUIPPED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.8 1 0.8 1" },
-                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
+                            RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"AttCard_{i}");
                     }
                     else
@@ -1598,7 +1642,7 @@ namespace Oxide.Plugins
                         {
                             Button = { Command = $"killadome.applyattachment {editingSlot} {att.Category} {att.Id}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                            RectTransform = { AnchorMin = "0.05 0.10", AnchorMax = "0.95 0.40" }
+                            RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"AttCard_{i}");
                     }
                 }

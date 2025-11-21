@@ -257,7 +257,7 @@ namespace Oxide.Plugins
             });
         }
         
-        // Phase 4: Handle OnHitHP, BleedChance, StaggerChance
+        // Phase 4: Handle OnHitHP, BleedChance, StaggerChance, and Damage
         private void OnPlayerAttack(BasePlayer attacker, HitInfo info)
         {
             if (attacker == null || info?.HitEntity == null) return;
@@ -267,6 +267,13 @@ namespace Oxide.Plugins
             
             if (!_activeWeaponModifiers.TryGetValue(weapon.net.ID, out var stats))
                 return;
+            
+            // Apply damage modifier
+            if (stats.DamageMul != 1.0f)
+            {
+                info.damageTypes.ScaleAll(stats.DamageMul);
+                LogDebug($"{attacker.displayName} applied damage multiplier: {stats.DamageMul:F2}");
+            }
             
             // Apply OnHitHP healing
             if (stats.OnHitHP > 0)
@@ -474,9 +481,24 @@ namespace Oxide.Plugins
                         string attachmentId = attachmentEntry.Value;
                         if (!string.IsNullOrEmpty(attachmentId))
                         {
-                            var attachmentItem = ItemManager.CreateByName(attachmentId, 1);
+                            // Remove "_AE" suffix for actual item creation
+                            string baseAttachmentId = attachmentId.EndsWith("_AE") 
+                                ? attachmentId.Substring(0, attachmentId.Length - 3) 
+                                : attachmentId;
+                                
+                            var attachmentItem = ItemManager.CreateByName(baseAttachmentId, 1);
                             if (attachmentItem != null)
                             {
+                                // If this is an AE attachment, apply the AE skin
+                                if (attachmentId.EndsWith("_AE"))
+                                {
+                                    ulong aeSkinId = _alterEgoSystem.GetAlterEgoSkinId(baseAttachmentId);
+                                    if (aeSkinId > 0)
+                                    {
+                                        attachmentItem.skin = aeSkinId;
+                                    }
+                                }
+                                
                                 // Add attachment to weapon's content container
                                 attachmentItem.MoveToContainer(item.contents);
                             }
@@ -1659,11 +1681,17 @@ namespace Oxide.Plugins
                 
                 foreach (var attachment in attachments.Values)
                 {
-                    // Check if player owns this attachment and if it's Alter-Ego
-                    var ownedItem = profile.OwnedSkins.FirstOrDefault(s => s == attachment || s == attachment + "_AE");
-                    if (ownedItem != null && ownedItem.EndsWith("_AE") && _alterEgoStats.TryGetValue(attachment, out var stats))
+                    // Skip if not an AE attachment
+                    if (!attachment.EndsWith("_AE"))
+                        continue;
+                    
+                    // Get base attachment ID (without "_AE" suffix)
+                    string baseAttachment = attachment.Substring(0, attachment.Length - 3);
+                    
+                    // Check if player owns this AE attachment and lookup stats by base ID
+                    if (profile.OwnedSkins.Contains(attachment) && _alterEgoStats.TryGetValue(baseAttachment, out var stats))
                     {
-                        activeAttachments.Add(attachment);
+                        activeAttachments.Add(baseAttachment);
                         
                         // Convert multipliers to percent changes
                         percentChanges["RecoilMul"].Add(stats.RecoilMul - 1.0f);
@@ -1683,9 +1711,9 @@ namespace Oxide.Plugins
                         result.HorizontalStability += stats.HorizontalStability;
                         
                         // Track VFX/SFX
-                        if (attachment == "weapon.mod.sodacansilencer" && !string.IsNullOrEmpty(stats.VFXPath))
+                        if (baseAttachment == "weapon.mod.sodacansilencer" && !string.IsNullOrEmpty(stats.VFXPath))
                             result.HasSodaCanVFX = true;
-                        if (attachment == "weapon.mod.muzzlebrake" && !string.IsNullOrEmpty(stats.VFXPath))
+                        if (baseAttachment == "weapon.mod.muzzlebrake" && !string.IsNullOrEmpty(stats.VFXPath))
                             result.HasBrakeVFX = true;
                     }
                 }

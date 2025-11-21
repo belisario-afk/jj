@@ -656,10 +656,16 @@ namespace Oxide.Plugins
         
         private void ApplyVelocityModifier(BaseProjectile weapon, WeaponModifierState stats)
         {
+            // NOTE: BaseProjectile does not have a projectileVelocity property in Rust/Oxide
+            // Projectile velocity is determined at projectile spawn time and cannot be easily modified
+            // This would require hooking into projectile creation or using OnWeaponFired
+            // Commenting out for now to avoid compilation errors
+            /*
             if (stats.VelocityMul != 1.0f)
             {
                 weapon.projectileVelocity *= stats.VelocityMul;
             }
+            */
         }
         
         private void ApplyReloadSpeedModifier(BaseProjectile weapon, WeaponModifierState stats)

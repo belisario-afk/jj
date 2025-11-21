@@ -1420,7 +1420,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = skin.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.58", AnchorMax = "0.95 0.78" }
+                        RectTransform = { AnchorMin = "0.05 0.45", AnchorMax = "0.95 0.68" }
                     }, $"SkinCard_{i}");
                     
                     string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
@@ -1429,7 +1429,7 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.42", AnchorMax = "0.50 0.56" }
+                        RectTransform = { AnchorMin = "0.05 0.25", AnchorMax = "0.50 0.38" }
                     }, $"SkinCard_{i}");
                     
                     // Always show a button
@@ -1516,7 +1516,10 @@ namespace Oxide.Plugins
                     new { Name = "Muzzle Boost", Id = "weapon.mod.muzzleboost", ImageId = "muzzle_boost", Category = "silencers" },
                 };
                 
-                var availableAttachments = allAttachments.Where(a => a.Category == selectedCategory).ToArray();
+                // Only show owned attachments
+                var availableAttachments = allAttachments
+                    .Where(a => a.Category == selectedCategory && session.Profile.OwnedSkins.Contains(a.Id))
+                    .ToArray();
                 
                 for (int i = 0; i < availableAttachments.Length; i++)
                 {
@@ -1524,13 +1527,12 @@ namespace Oxide.Plugins
                     float yMin = 0.88f - (i * 0.22f);
                     float yMax = yMin + 0.18f;
                     
-                    bool isOwned = session.Profile.OwnedSkins.Contains(att.Id);
                     var attachments = editingSlot == "primary" ? loadout.PrimaryAttachments : loadout.SecondaryAttachments;
                     bool isEquipped = attachments.ContainsValue(att.Id);
                     
                     container.Add(new CuiPanel
                     {
-                        Image = { Color = isOwned ? "0.14 0.14 0.18 1" : "0.10 0.10 0.14 0.5" },
+                        Image = { Color = "0.14 0.14 0.18 1" },
                         RectTransform = { AnchorMin = $"0.03 {yMin}", AnchorMax = $"0.97 {yMax}" }
                     }, "AttachmentsPanel", $"AttCard_{i}");
                     
@@ -1546,19 +1548,19 @@ namespace Oxide.Plugins
                     container.Add(new CuiLabel
                     {
                         Text = { Text = att.Name, FontSize = 10, Align = TextAnchor.MiddleLeft, Color = "1 1 1 1" },
-                        RectTransform = { AnchorMin = "0.05 0.58", AnchorMax = "0.95 0.78" }
+                        RectTransform = { AnchorMin = "0.05 0.45", AnchorMax = "0.95 0.68" }
                     }, $"AttCard_{i}");
                     
-                    string statusText = isEquipped ? "EQUIPPED" : (isOwned ? "OWNED" : "LOCKED");
-                    string statusColor = isEquipped ? "0.4 1.0 0.4" : (isOwned ? "0.6 0.8 1.0" : "1.0 0.4 0.4");
+                    string statusText = isEquipped ? "EQUIPPED" : "OWNED";
+                    string statusColor = isEquipped ? "0.4 1.0 0.4" : "0.6 0.8 1.0";
                     
                     container.Add(new CuiLabel
                     {
                         Text = { Text = statusText, FontSize = 8, Align = TextAnchor.MiddleLeft, Color = $"{statusColor} 1" },
-                        RectTransform = { AnchorMin = "0.05 0.42", AnchorMax = "0.50 0.56" }
+                        RectTransform = { AnchorMin = "0.05 0.25", AnchorMax = "0.50 0.38" }
                     }, $"AttCard_{i}");
                     
-                    // Always show a button
+                    // Show button based on status
                     if (isEquipped)
                     {
                         container.Add(new CuiButton
@@ -1568,21 +1570,12 @@ namespace Oxide.Plugins
                             RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
                         }, $"AttCard_{i}");
                     }
-                    else if (isOwned)
+                    else
                     {
                         container.Add(new CuiButton
                         {
                             Button = { Command = $"killadome.applyattachment {editingSlot} {att.Category} {att.Id}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
-                            RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
-                        }, $"AttCard_{i}");
-                    }
-                    else
-                    {
-                        container.Add(new CuiButton
-                        {
-                            Button = { Command = "", Color = "0.15 0.15 0.15 0.5" },
-                            Text = { Text = "LOCKED", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "0.5 0.5 0.5 1" },
                             RectTransform = { AnchorMin = "0.05 0.08", AnchorMax = "0.95 0.35" }
                         }, $"AttCard_{i}");
                     }

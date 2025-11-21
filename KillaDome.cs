@@ -299,13 +299,20 @@ namespace Oxide.Plugins
                 var victim = info.HitEntity as BasePlayer;
                 if (victim != null)
                 {
-                    // Apply movement slow effect
-                    victim.metabolism.SendChangesToClient();
+                    // Apply movement slow effect by temporarily storing a slow modifier
+                    float originalSpeed = _playerMovementModifiers.ContainsKey(victim.userID) 
+                        ? _playerMovementModifiers[victim.userID] 
+                        : 1.0f;
+                    _playerMovementModifiers[victim.userID] = originalSpeed * 0.5f; // 50% movement speed
+                    
                     timer.Once(2f, () => {
-                        // Remove slow after 2 seconds (implemented via metabolism)
+                        // Remove slow after 2 seconds
                         if (victim != null && victim.IsConnected)
                         {
-                            victim.metabolism.SendChangesToClient();
+                            if (_playerMovementModifiers.ContainsKey(victim.userID))
+                            {
+                                _playerMovementModifiers[victim.userID] = originalSpeed;
+                            }
                         }
                     });
                     LogDebug($"{attacker.displayName} staggered {victim.displayName}");
@@ -356,33 +363,29 @@ namespace Oxide.Plugins
         // Phase 5: Soda Can Silencer effects
         private void PlaySodaCanEffects(Vector3 position)
         {
-            // VFX: Smoke effect at muzzle
+            // VFX: Smoke effect at muzzle (silencers produce smoke from trapped gases)
             Effect.server.Run(
                 "assets/bundled/prefabs/fx/smoke_small.prefab",
                 position,
                 Vector3.forward
             );
             
-            // SFX: Ricochet sound
-            Effect.server.Run(
-                "assets/bundled/prefabs/fx/ricochet/ricochet1.prefab",
-                position
-            );
+            // Note: No sound effect for silencers - they're meant to reduce sound
         }
         
         // Phase 5: Muzzle Brake effects
         private void PlayBrakeEffects(Vector3 position)
         {
-            // VFX: Enhanced muzzle flash
+            // VFX: Enhanced muzzle flash (brake redirects gases)
             Effect.server.Run(
                 "assets/bundled/prefabs/fx/weapons/muzzleflash/muzzleflash1.prefab",
                 position,
                 Vector3.forward
             );
             
-            // SFX: Echo sound (using explosion sound as substitute)
+            // SFX: Use weapon fire sound for echo effect
             Effect.server.Run(
-                "assets/bundled/prefabs/fx/explosions/explosion_01.prefab",
+                "assets/bundled/prefabs/fx/weapons/rifle/attack.prefab",
                 position
             );
         }
@@ -619,7 +622,7 @@ namespace Oxide.Plugins
         {
             if (stats.ReloadSpeedMul != 1.0f)
             {
-                weapon.reloadTime *= stats.ReloadSpeedMul;
+                weapon.reloadTime /= stats.ReloadSpeedMul; // Higher multiplier = faster reload = lower time
             }
         }
         
@@ -634,8 +637,17 @@ namespace Oxide.Plugins
             {
                 // Check if weapon belongs to this player
                 var entity = BaseNetworkable.serverEntities.Find(modEntry.Key);
-                if (entity == null || (entity as BaseProjectile)?.GetOwnerPlayer() == player)
+                if (entity != null)
                 {
+                    var weapon = entity as BaseProjectile;
+                    if (weapon?.GetOwnerPlayer() == player)
+                    {
+                        itemsToRemove.Add(modEntry.Key);
+                    }
+                }
+                else
+                {
+                    // Entity no longer exists - mark for removal
                     itemsToRemove.Add(modEntry.Key);
                 }
             }

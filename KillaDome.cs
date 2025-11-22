@@ -50,10 +50,170 @@ namespace Oxide.Plugins
         private TelemetrySystem _telemetry;
         
         private PluginConfig _config;
+        private GunConfig _gunConfig;
         private Dictionary<ulong, PlayerSession> _activeSessions = new Dictionary<ulong, PlayerSession>();
         
         private const string PERMISSION_ADMIN = "killadome.admin";
         private const string PERMISSION_VIP = "killadome.vip";
+        
+        #endregion
+        
+        #region Gun & Image Configuration
+        
+        /// <summary>
+        /// CENTRALIZED GUN AND IMAGE CONFIGURATION
+        /// This is the ONLY place you need to add/edit guns and their images!
+        /// Changes here automatically apply to both Store Tab and Loadout Tab.
+        /// </summary>
+        public class GunConfig
+        {
+            // ===== GUNS CONFIGURATION =====
+            // Add or modify guns here. Each gun needs:
+            // - Id: Internal identifier (lowercase, no spaces)
+            // - DisplayName: Name shown to players
+            // - RustItemShortname: The actual Rust item shortname
+            // - ImageUrl: Direct URL to the gun's image
+            
+            public Dictionary<string, GunDefinition> Guns = new Dictionary<string, GunDefinition>
+            {
+                ["ak47"] = new GunDefinition
+                {
+                    Id = "ak47",
+                    DisplayName = "AK-47",
+                    RustItemShortname = "rifle.ak",
+                    ImageUrl = "https://i.imgur.com/YourAK47Image.png"
+                },
+                ["m249"] = new GunDefinition
+                {
+                    Id = "m249",
+                    DisplayName = "M249",
+                    RustItemShortname = "lmg.m249",
+                    ImageUrl = "https://i.imgur.com/YourM249Image.png"
+                },
+                ["pistol"] = new GunDefinition
+                {
+                    Id = "pistol",
+                    DisplayName = "Semi-Automatic Pistol",
+                    RustItemShortname = "pistol.semiauto",
+                    ImageUrl = "https://i.imgur.com/YourPistolImage.png"
+                },
+                ["lr300"] = new GunDefinition
+                {
+                    Id = "lr300",
+                    DisplayName = "LR-300",
+                    RustItemShortname = "rifle.lr300",
+                    ImageUrl = "https://i.imgur.com/YourLR300Image.png"
+                },
+                ["mp5"] = new GunDefinition
+                {
+                    Id = "mp5",
+                    DisplayName = "MP5A4",
+                    RustItemShortname = "smg.mp5",
+                    ImageUrl = "https://i.imgur.com/YourMP5Image.png"
+                }
+            };
+            
+            // ===== SKINS CONFIGURATION =====
+            // Add or modify weapon skins here. Each skin needs:
+            // - Name: Display name for the skin
+            // - SkinId: Rust workshop skin ID or custom identifier
+            // - WeaponId: Which gun this skin is for (must match a gun Id above)
+            // - ImageUrl: Direct URL to the skin preview image
+            
+            public List<SkinDefinition> Skins = new List<SkinDefinition>
+            {
+                // AK-47 Skins
+                new SkinDefinition
+                {
+                    Name = "AK-47 Neon",
+                    SkinId = "3102802323",
+                    WeaponId = "ak47",
+                    ImageUrl = "https://i.imgur.com/YourAK47NeonSkin.png"
+                },
+                new SkinDefinition
+                {
+                    Name = "AK-47 Classic",
+                    SkinId = "skin_ak47_classic",
+                    WeaponId = "ak47",
+                    ImageUrl = "https://i.imgur.com/YourAK47ClassicSkin.png"
+                },
+                
+                // M249 Skins
+                new SkinDefinition
+                {
+                    Name = "M249 Chrome",
+                    SkinId = "skin_m249_chrome",
+                    WeaponId = "m249",
+                    ImageUrl = "https://i.imgur.com/YourM249ChromeSkin.png"
+                },
+                
+                // Pistol Skins
+                new SkinDefinition
+                {
+                    Name = "Pistol Black",
+                    SkinId = "skin_pistol_black",
+                    WeaponId = "pistol",
+                    ImageUrl = "https://i.imgur.com/YourPistolBlackSkin.png"
+                },
+                
+                // LR-300 Skins
+                new SkinDefinition
+                {
+                    Name = "LR-300 Gold",
+                    SkinId = "skin_lr300_gold",
+                    WeaponId = "lr300",
+                    ImageUrl = "https://i.imgur.com/YourLR300GoldSkin.png"
+                },
+                
+                // MP5 Skins
+                new SkinDefinition
+                {
+                    Name = "MP5 Tactical",
+                    SkinId = "skin_mp5_tactical",
+                    WeaponId = "mp5",
+                    ImageUrl = "https://i.imgur.com/YourMP5TacticalSkin.png"
+                }
+            };
+            
+            // ===== HELPER METHODS =====
+            
+            public string GetGunImageUrl(string gunId)
+            {
+                return Guns.ContainsKey(gunId) ? Guns[gunId].ImageUrl : "";
+            }
+            
+            public string GetSkinImageUrl(string skinId)
+            {
+                var skin = Skins.FirstOrDefault(s => s.SkinId == skinId);
+                return skin?.ImageUrl ?? "";
+            }
+            
+            public string[] GetAllGunIds()
+            {
+                return Guns.Keys.ToArray();
+            }
+            
+            public SkinDefinition[] GetSkinsForWeapon(string weaponId)
+            {
+                return Skins.Where(s => s.WeaponId == weaponId).ToArray();
+            }
+        }
+        
+        public class GunDefinition
+        {
+            public string Id { get; set; }
+            public string DisplayName { get; set; }
+            public string RustItemShortname { get; set; }
+            public string ImageUrl { get; set; }
+        }
+        
+        public class SkinDefinition
+        {
+            public string Name { get; set; }
+            public string SkinId { get; set; }
+            public string WeaponId { get; set; }
+            public string ImageUrl { get; set; }
+        }
         
         #endregion
         
@@ -130,6 +290,9 @@ namespace Oxide.Plugins
         {
             permission.RegisterPermission(PERMISSION_ADMIN, this);
             permission.RegisterPermission(PERMISSION_VIP, this);
+            
+            // Initialize gun configuration
+            _gunConfig = new GunConfig();
             
             // Initialize all systems
             _saveManager = new SaveManager(this, _config);
@@ -711,7 +874,7 @@ namespace Oxide.Plugins
             if (session == null || session.Profile.Loadouts.Count == 0) return;
             
             var loadout = session.Profile.Loadouts[0];
-            string[] availableWeapons = { "ak47", "m249", "pistol" }; // Available weapons
+            string[] availableWeapons = _gunConfig.GetAllGunIds(); // Get weapons from centralized config
             
             string currentWeapon = slot == "primary" ? loadout.Primary : loadout.Secondary;
             int currentIndex = Array.IndexOf(availableWeapons, currentWeapon);
@@ -1275,20 +1438,26 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
                 }, "PrimaryBox");
                 
-                // Weapon image
+                // Weapon image - using centralized config
+                string primaryImageUrl = _plugin._gunConfig.GetGunImageUrl(loadout.Primary);
                 container.Add(new CuiElement
                 {
                     Parent = "PrimaryBox",
                     Components =
                     {
-                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", loadout.Primary) },
+                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", primaryImageUrl) },
                         new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
                     }
                 });
                 
+                // Get display name from config
+                string primaryDisplayName = _plugin._gunConfig.Guns.ContainsKey(loadout.Primary) 
+                    ? _plugin._gunConfig.Guns[loadout.Primary].DisplayName 
+                    : loadout.Primary.ToUpper();
+                
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = loadout.Primary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    Text = { Text = primaryDisplayName, FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
                     RectTransform = { AnchorMin = "0.05 0.12", AnchorMax = "0.95 0.28" }
                 }, "PrimaryBox");
                 
@@ -1325,20 +1494,26 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.05 0.88", AnchorMax = "0.95 0.98" }
                 }, "SecondaryBox");
                 
-                // Weapon image
+                // Weapon image - using centralized config
+                string secondaryImageUrl = _plugin._gunConfig.GetGunImageUrl(loadout.Secondary);
                 container.Add(new CuiElement
                 {
                     Parent = "SecondaryBox",
                     Components =
                     {
-                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", loadout.Secondary) },
+                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", secondaryImageUrl) },
                         new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
                     }
                 });
                 
+                // Get display name from config
+                string secondaryDisplayName = _plugin._gunConfig.Guns.ContainsKey(loadout.Secondary) 
+                    ? _plugin._gunConfig.Guns[loadout.Secondary].DisplayName 
+                    : loadout.Secondary.ToUpper();
+                
                 container.Add(new CuiLabel
                 {
-                    Text = { Text = loadout.Secondary.ToUpper(), FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
+                    Text = { Text = secondaryDisplayName, FontSize = 20, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
                     RectTransform = { AnchorMin = "0.05 0.12", AnchorMax = "0.95 0.28" }
                 }, "SecondaryBox");
                 
@@ -1411,16 +1586,8 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0 0", AnchorMax = "1 0.94" }
                 }, "SkinsPanel", "SkinsScroll");
                 
-                // Skins list
-                var allSkins = new[]
-                {
-                    new { Name = "AK-47 Neon", Id = "3102802323", ImageId = "ak47_neon", Weapon = "ak47" },
-                    new { Name = "AK-47 Classic", Id = "skin_ak47_neon", ImageId = "ak47_classic", Weapon = "ak47" },
-                    new { Name = "M249 Chrome", Id = "skin_m249_chrome", ImageId = "m249_chrome", Weapon = "m249" },
-                    new { Name = "Pistol Black", Id = "skin_pistol_black", ImageId = "pistol_black", Weapon = "pistol" },
-                };
-                
-                var availableSkins = allSkins.Where(s => s.Weapon == currentWeapon).ToArray();
+                // Skins list - Now using centralized configuration!
+                var availableSkins = _plugin._gunConfig.GetSkinsForWeapon(currentWeapon);
                 
                 for (int i = 0; i < availableSkins.Length; i++)
                 {
@@ -1428,8 +1595,8 @@ namespace Oxide.Plugins
                     float yMin = 0.96f - ((i + 1) * 0.20f);
                     float yMax = yMin + 0.18f;
                     
-                    bool isOwned = session.Profile.OwnedSkins.Contains(skin.Id);
-                    bool isEquipped = loadout.Skins.TryGetValue(skin.Weapon, out string equippedSkin) && equippedSkin == skin.Id;
+                    bool isOwned = session.Profile.OwnedSkins.Contains(skin.SkinId);
+                    bool isEquipped = loadout.Skins.TryGetValue(skin.WeaponId, out string equippedSkin) && equippedSkin == skin.SkinId;
                     
                     container.Add(new CuiPanel
                     {
@@ -1446,13 +1613,13 @@ namespace Oxide.Plugins
                         }, $"SkinCard_{i}");
                     }
                     
-                    // Skin image
+                    // Skin image - using ImageUrl from centralized config
                     container.Add(new CuiElement
                     {
                         Parent = $"SkinCard_{i}",
                         Components =
                         {
-                            new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", skin.ImageId) },
+                            new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", skin.ImageUrl) },
                             new CuiRectTransformComponent { AnchorMin = "0.05 0.05", AnchorMax = "0.35 0.45" }
                         }
                     });
@@ -1485,7 +1652,7 @@ namespace Oxide.Plugins
                     {
                         container.Add(new CuiButton
                         {
-                            Button = { Command = $"killadome.applyskin {editingSlot} {skin.Id}", Color = "0.2 0.6 0.8 0.9" },
+                            Button = { Command = $"killadome.applyskin {editingSlot} {skin.SkinId}", Color = "0.2 0.6 0.8 0.9" },
                             Text = { Text = "EQUIP", FontSize = 9, Align = TextAnchor.MiddleCenter, Color = "1 1 1 1" },
                             RectTransform = { AnchorMin = "0.40 0.10", AnchorMax = "0.95 0.40" }
                         }, $"SkinCard_{i}");

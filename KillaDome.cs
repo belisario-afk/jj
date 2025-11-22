@@ -1281,7 +1281,7 @@ namespace Oxide.Plugins
                     Parent = "PrimaryBox",
                     Components =
                     {
-                        new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", loadout.Primary) },
+                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", loadout.Primary) },
                         new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
                     }
                 });
@@ -1331,7 +1331,7 @@ namespace Oxide.Plugins
                     Parent = "SecondaryBox",
                     Components =
                     {
-                        new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", loadout.Secondary) },
+                        new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", loadout.Secondary) },
                         new CuiRectTransformComponent { AnchorMin = "0.25 0.30", AnchorMax = "0.75 0.70" }
                     }
                 });
@@ -1452,7 +1452,7 @@ namespace Oxide.Plugins
                         Parent = $"SkinCard_{i}",
                         Components =
                         {
-                            new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", skin.ImageId) },
+                            new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", skin.ImageId) },
                             new CuiRectTransformComponent { AnchorMin = "0.05 0.05", AnchorMax = "0.35 0.45" }
                         }
                     });
@@ -1607,7 +1607,7 @@ namespace Oxide.Plugins
                         Parent = $"AttCard_{i}",
                         Components =
                         {
-                            new CuiRawImageComponent { Png = (string)ImageLibrary?.Call("GetImage", att.ImageId) },
+                            new CuiRawImageComponent { Png = (string)_plugin.ImageLibrary?.Call("GetImage", att.ImageId) },
                             new CuiRectTransformComponent { AnchorMin = "0.05 0.05", AnchorMax = "0.35 0.45" }
                         }
                     });

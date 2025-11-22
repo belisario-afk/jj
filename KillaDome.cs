@@ -2120,12 +2120,8 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.3 0.72", AnchorMax = "0.7 0.77" }
                 }, UI_TAB_CONTAINER);
                 
-                // Gun Skins (LEFT COLUMN)
-                var gunSkins = new[]
-                {
-                    new { Name = "AK-47 Neon Skin", Cost = 500, Id = "3102802323", ImageId = "ak47_neon" },
-                    new { Name = "AK-47 Classic Skin", Cost = 400, Id = "skin_ak47_neon", ImageId = "ak47_classic" }
-                };
+                // Get Gun Skins from StoreAPI (dynamic inventory)
+                var gunSkins = _storeAPI.GetGunSkins();
                 
                 // Column Title: GUN SKINS
                 container.Add(new CuiLabel
@@ -2134,8 +2130,8 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.12 0.62", AnchorMax = "0.48 0.67" }
                 }, UI_TAB_CONTAINER);
                 
-                // Gun Skins Items
-                for (int i = 0; i < gunSkins.Length; i++)
+                // Gun Skins Items - dynamically populated from store inventory
+                for (int i = 0; i < gunSkins.Count; i++)
                 {
                     var item = gunSkins[i];
                     float yMin = 0.52f - (i * 0.15f);
@@ -2218,33 +2214,8 @@ namespace Oxide.Plugins
                     }, UI_TAB_CONTAINER);
                 }
                 
-                // Attachments (RIGHT COLUMN) - Both Normal and Alter-Ego versions
-                var attachments = new[]
-                {
-                    // Scopes - Normal
-                    new { Name = "Small Scope", Cost = 250, Id = "weapon.mod.small.scope", ImageId = "small_scope", IsAlterEgo = false },
-                    new { Name = "Small Scope AE", Cost = 600, Id = "weapon.mod.small.scope_AE", ImageId = "small_scope_ae", IsAlterEgo = true },
-                    new { Name = "8x Scope", Cost = 400, Id = "weapon.mod.8x.scope", ImageId = "8x_scope", IsAlterEgo = false },
-                    new { Name = "8x Scope AE", Cost = 800, Id = "weapon.mod.8x.scope_AE", ImageId = "8x_scope_ae", IsAlterEgo = true },
-                    
-                    // Underbarrel - Normal
-                    new { Name = "Holo Sight", Cost = 300, Id = "weapon.mod.holosight", ImageId = "holo_sight", IsAlterEgo = false },
-                    new { Name = "Holo Sight AE", Cost = 700, Id = "weapon.mod.holosight_AE", ImageId = "holo_sight_ae", IsAlterEgo = true },
-                    new { Name = "Laser Sight", Cost = 250, Id = "weapon.mod.lasersight", ImageId = "laser_sight", IsAlterEgo = false },
-                    new { Name = "Laser Sight AE", Cost = 650, Id = "weapon.mod.lasersight_AE", ImageId = "laser_sight_ae", IsAlterEgo = true },
-                    
-                    // Silencers/Muzzle - Normal
-                    new { Name = "Soda Can Silencer", Cost = 150, Id = "weapon.mod.sodacansilencer", ImageId = "sodacan_silencer", IsAlterEgo = false },
-                    new { Name = "Soda Can Silencer AE", Cost = 550, Id = "weapon.mod.sodacansilencer_AE", ImageId = "sodacan_silencer_ae", IsAlterEgo = true },
-                    new { Name = "Oil Filter Silencer", Cost = 200, Id = "weapon.mod.oilfiltersilencer", ImageId = "oilfilter_silencer", IsAlterEgo = false },
-                    new { Name = "Oil Filter Silencer AE", Cost = 600, Id = "weapon.mod.oilfiltersilencer_AE", ImageId = "oilfilter_silencer_ae", IsAlterEgo = true },
-                    new { Name = "Silencer", Cost = 400, Id = "weapon.mod.silencer", ImageId = "silencer", IsAlterEgo = false },
-                    new { Name = "Silencer AE", Cost = 800, Id = "weapon.mod.silencer_AE", ImageId = "silencer_ae", IsAlterEgo = true },
-                    new { Name = "Muzzle Brake", Cost = 300, Id = "weapon.mod.muzzlebrake", ImageId = "muzzle_brake", IsAlterEgo = false },
-                    new { Name = "Muzzle Brake AE", Cost = 700, Id = "weapon.mod.muzzlebrake_AE", ImageId = "muzzle_brake_ae", IsAlterEgo = true },
-                    new { Name = "Muzzle Boost", Cost = 350, Id = "weapon.mod.muzzleboost", ImageId = "muzzle_boost", IsAlterEgo = false },
-                    new { Name = "Muzzle Boost AE", Cost = 750, Id = "weapon.mod.muzzleboost_AE", ImageId = "muzzle_boost_ae", IsAlterEgo = true }
-                };
+                // Get Attachments from StoreAPI (dynamic inventory)
+                var attachments = _storeAPI.GetAttachments();
                 
                 // Column Title: ATTACHMENTS
                 container.Add(new CuiLabel
@@ -2253,8 +2224,8 @@ namespace Oxide.Plugins
                     RectTransform = { AnchorMin = "0.52 0.62", AnchorMax = "0.88 0.67" }
                 }, UI_TAB_CONTAINER);
                 
-                // Attachments Items - Compact layout for 18 items
-                for (int i = 0; i < attachments.Length; i++)
+                // Attachments Items - dynamically populated from store inventory
+                for (int i = 0; i < attachments.Count; i++)
                 {
                     var item = attachments[i];
                     float yMin = 0.60f - (i * 0.08f); // Smaller vertical spacing
@@ -2831,12 +2802,90 @@ namespace Oxide.Plugins
             private KillaDome _plugin;
             private PluginConfig _config;
             private BloodTokenEconomy _economy;
+            private List<StoreItem> _storeInventory;
+            private List<StoreItem> _cachedGunSkins;
+            private List<StoreItem> _cachedAttachments;
             
             internal StoreAPI(KillaDome plugin, PluginConfig config, BloodTokenEconomy economy)
             {
                 _plugin = plugin;
                 _config = config;
                 _economy = economy;
+                InitializeStoreInventory();
+            }
+            
+            private void InitializeStoreInventory()
+            {
+                _storeInventory = new List<StoreItem>();
+                
+                // Add Gun Skins - automatically populated from gun registry
+                AddGunSkin("AK-47 Neon Skin", "ak47", "3102802323", "ak47_neon", 500);
+                AddGunSkin("AK-47 Classic Skin", "ak47", "skin_ak47_classic", "ak47_classic", 400);
+                AddGunSkin("M249 Chrome", "m249", "skin_m249_chrome", "m249_chrome", 450);
+                AddGunSkin("Pistol Black", "pistol", "skin_pistol_black", "pistol_black", 300);
+                
+                // Add Attachments - Normal versions
+                AddAttachment("Small Scope", "weapon.mod.small.scope", "small_scope", 250, false);
+                AddAttachment("8x Scope", "weapon.mod.8x.scope", "8x_scope", 400, false);
+                AddAttachment("Holo Sight", "weapon.mod.holosight", "holo_sight", 300, false);
+                AddAttachment("Laser Sight", "weapon.mod.lasersight", "laser_sight", 250, false);
+                AddAttachment("Soda Can Silencer", "weapon.mod.sodacansilencer", "sodacan_silencer", 150, false);
+                AddAttachment("Oil Filter Silencer", "weapon.mod.oilfiltersilencer", "oilfilter_silencer", 200, false);
+                AddAttachment("Silencer", "weapon.mod.silencer", "silencer", 400, false);
+                AddAttachment("Muzzle Brake", "weapon.mod.muzzlebrake", "muzzle_brake", 300, false);
+                AddAttachment("Muzzle Boost", "weapon.mod.muzzleboost", "muzzle_boost", 350, false);
+                
+                // Add Attachments - Alter-Ego versions
+                AddAttachment("Small Scope AE", "weapon.mod.small.scope_AE", "small_scope_ae", 600, true);
+                AddAttachment("8x Scope AE", "weapon.mod.8x.scope_AE", "8x_scope_ae", 800, true);
+                AddAttachment("Holo Sight AE", "weapon.mod.holosight_AE", "holo_sight_ae", 700, true);
+                AddAttachment("Laser Sight AE", "weapon.mod.lasersight_AE", "laser_sight_ae", 650, true);
+                AddAttachment("Soda Can Silencer AE", "weapon.mod.sodacansilencer_AE", "sodacan_silencer_ae", 550, true);
+                AddAttachment("Oil Filter Silencer AE", "weapon.mod.oilfiltersilencer_AE", "oilfilter_silencer_ae", 600, true);
+                AddAttachment("Silencer AE", "weapon.mod.silencer_AE", "silencer_ae", 800, true);
+                AddAttachment("Muzzle Brake AE", "weapon.mod.muzzlebrake_AE", "muzzle_brake_ae", 700, true);
+                AddAttachment("Muzzle Boost AE", "weapon.mod.muzzleboost_AE", "muzzle_boost_ae", 750, true);
+                
+                // Build caches for performance
+                _cachedGunSkins = _storeInventory.Where(item => item.ItemType == StoreItemType.GunSkin).ToList();
+                _cachedAttachments = _storeInventory.Where(item => item.ItemType == StoreItemType.Attachment).ToList();
+            }
+            
+            private void AddGunSkin(string name, string weaponType, string id, string imageId, int cost)
+            {
+                _storeInventory.Add(new StoreItem
+                {
+                    Name = name,
+                    ItemType = StoreItemType.GunSkin,
+                    WeaponType = weaponType,
+                    Id = id,
+                    ImageId = imageId,
+                    Cost = cost,
+                    IsAlterEgo = false
+                });
+            }
+            
+            private void AddAttachment(string name, string id, string imageId, int cost, bool isAlterEgo)
+            {
+                _storeInventory.Add(new StoreItem
+                {
+                    Name = name,
+                    ItemType = StoreItemType.Attachment,
+                    Id = id,
+                    ImageId = imageId,
+                    Cost = cost,
+                    IsAlterEgo = isAlterEgo
+                });
+            }
+            
+            public List<StoreItem> GetGunSkins()
+            {
+                return _cachedGunSkins;
+            }
+            
+            public List<StoreItem> GetAttachments()
+            {
+                return _cachedAttachments;
             }
             
             public bool PurchaseItem(ulong steamId, string itemId, int cost)
@@ -2868,6 +2917,23 @@ namespace Oxide.Plugins
                 // For now, just log
                 _plugin.LogDebug($"Processing Tebex purchase: {steamId}, {packageId}, {transactionId}");
             }
+        }
+        
+        internal enum StoreItemType
+        {
+            GunSkin,
+            Attachment
+        }
+        
+        internal class StoreItem
+        {
+            public string Name { get; set; }
+            public StoreItemType ItemType { get; set; }
+            public string WeaponType { get; set; } // For gun skins - "ak47", "m249", "pistol"
+            public string Id { get; set; }
+            public string ImageId { get; set; }
+            public int Cost { get; set; }
+            public bool IsAlterEgo { get; set; }
         }
         
         #endregion

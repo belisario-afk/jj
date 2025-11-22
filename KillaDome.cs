@@ -2803,6 +2803,8 @@ namespace Oxide.Plugins
             private PluginConfig _config;
             private BloodTokenEconomy _economy;
             private List<StoreItem> _storeInventory;
+            private List<StoreItem> _cachedGunSkins;
+            private List<StoreItem> _cachedAttachments;
             
             internal StoreAPI(KillaDome plugin, PluginConfig config, BloodTokenEconomy economy)
             {
@@ -2818,7 +2820,7 @@ namespace Oxide.Plugins
                 
                 // Add Gun Skins - automatically populated from gun registry
                 AddGunSkin("AK-47 Neon Skin", "ak47", "3102802323", "ak47_neon", 500);
-                AddGunSkin("AK-47 Classic Skin", "ak47", "skin_ak47_neon", "ak47_classic", 400);
+                AddGunSkin("AK-47 Classic Skin", "ak47", "skin_ak47_classic", "ak47_classic", 400);
                 AddGunSkin("M249 Chrome", "m249", "skin_m249_chrome", "m249_chrome", 450);
                 AddGunSkin("Pistol Black", "pistol", "skin_pistol_black", "pistol_black", 300);
                 
@@ -2843,6 +2845,10 @@ namespace Oxide.Plugins
                 AddAttachment("Silencer AE", "weapon.mod.silencer_AE", "silencer_ae", 800, true);
                 AddAttachment("Muzzle Brake AE", "weapon.mod.muzzlebrake_AE", "muzzle_brake_ae", 700, true);
                 AddAttachment("Muzzle Boost AE", "weapon.mod.muzzleboost_AE", "muzzle_boost_ae", 750, true);
+                
+                // Build caches for performance
+                _cachedGunSkins = _storeInventory.Where(item => item.ItemType == StoreItemType.GunSkin).ToList();
+                _cachedAttachments = _storeInventory.Where(item => item.ItemType == StoreItemType.Attachment).ToList();
             }
             
             private void AddGunSkin(string name, string weaponType, string id, string imageId, int cost)
@@ -2874,12 +2880,12 @@ namespace Oxide.Plugins
             
             public List<StoreItem> GetGunSkins()
             {
-                return _storeInventory.Where(item => item.ItemType == StoreItemType.GunSkin).ToList();
+                return _cachedGunSkins;
             }
             
             public List<StoreItem> GetAttachments()
             {
-                return _storeInventory.Where(item => item.ItemType == StoreItemType.Attachment).ToList();
+                return _cachedAttachments;
             }
             
             public bool PurchaseItem(ulong steamId, string itemId, int cost)
